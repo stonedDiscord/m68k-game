@@ -15,7 +15,7 @@
 #
 #   SRCS=main.c user.c \
 #        driver.s
-SRCS=main.c
+SRCS=main.c gpu.c
 
 # Specify the CPU type that you are targeting your build towards.
 #
@@ -73,7 +73,7 @@ $(BUILDDIR)/%.s.o: %.s
 
 -include $(DEPS)
 
-all: bmbinary rom
+all: bmbinary rom zip
 
 crt: crt0.S
 	$(CC) $(CFLAGS) -c -o crt0.o crt0.S
@@ -86,6 +86,12 @@ clean:
 rom:
 	$(OBJCOPY) -O binary bmbinary bmbinary.rom
 	$(OBJCOPY) -O srec bmbinary bmbinary.srec
+
+zip:
+	python3 -c "data=open('bmbinary.rom','rb').read(); open('skat_tv_version_ts3.1.u2.bin','wb').write(data[0::2]); open('skat_tv_version_ts3.2.u6.bin','wb').write(data[1::2])"
+	truncate --size=128K skat_tv_version_ts3.1.u2.bin
+	truncate --size=128K skat_tv_version_ts3.2.u6.bin
+	7z a skattva.zip skat_tv_version_ts3.1.u2.bin skat_tv_version_ts3.2.u6.bin
 
 dump:
 	$(OBJDUMP) -mm68k:$(CPU) -belf32-m68k -st -j.evt bmbinary
