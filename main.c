@@ -1,8 +1,153 @@
+/*
+ * example.c – HD63484 usage example
+ *
+ * Configured to match the ADP/Merkur arcade hardware as emulated in MAME
+ * (adp.cpp driver: quickjac, skattv, skattva, fashiong etc.)
+ *
+ * System specs:
+ *   CPU  : 68EC000 @ 8 MHz
+ *   ACRTC: HD63484, VRAM at 0x00000 in the chip's address space (128KB RAM)
+ *   Screen: 384 x 280 total raster, 60 Hz, full visible area
+ *   Colors: 4 bits per pixel (16 colours), palette index 0-15
+ *
+ * Pixel geometry with 4bpp + GAI_INC1:
+ *   Each memory cycle fetches 1 word = 4 pixels (one nibble each).
+ *   Display width  = (HDW+1) cycles * 4 px/cycle = 96 * 4 = 384 px
+ *   Display height = SP1 rasters = 280
+ *   Memory width   = 384 px / 4 px per word = 96 words per line
+ *
+ * Palette (ADP hardware RGB formula, from adp.cpp adp_palette()):
+ *   r = 0xB8 * bit(i,0) + 0x47 * bit(i,3)
+ *   g = 0xB8 * bit(i,1) + 0x47 * bit(i,3)
+ *   b = 0xB8 * bit(i,2) + 0x47 * bit(i,3)
+ *   -> 4-bit IRGB palette (bit3=intensity, bits2-0=RGB)
+ */
+
 #include "gpu.h"
+
+/* ---- Screen geometry ---- */
+#define SCREEN_W    384
+#define SCREEN_H    280
+
+/*
+ * Horizontal timing (memory cycles):
+ *   HC  = total cycles - 1 = 383  (384 total = SCREEN_W)
+ *   HSW = 2  (minimum valid sync width)
+ *   HDS = 0  (display starts 1 cycle after HSYNC rise, encoded as HS-1=0)
+ *   HDW = 95 (display width: (95+1)*4px = 384px = SCREEN_W)
+ *
+ * Vertical timing (rasters):
+ *   VC  = 280  (total rasters = SCREEN_H, stored directly not -1)
+ *   VSW = 2    (sync width)
+ *   VDS = 0    (display starts at raster 1, encoded as VS-1=0)
+ *   SP1 = 280  (Base screen height = full SCREEN_H rasters)
+ *
+ * Memory width = SCREEN_W / 4 px_per_word = 96 words per line
+ */
+#define HTOTAL         383
+#define HSYNC_W          2
+#define HDISP_S          0
+#define HDISP_W         95
+
+#define VTOTAL         280
+#define VSYNC_W          2
+#define VDISP_S          0
+#define SCREEN_RASTERS 280
+
+#define MEM_WIDTH       96
+#define VRAM_BASE   0x00000UL
+
+/* ---- 4bpp IRGB palette indices ---- */
+#define PAL_BLACK    0x0u
+#define PAL_RED      0x1u
+#define PAL_GREEN    0x2u
+#define PAL_YELLOW   0x3u
+#define PAL_BLUE     0x4u
+#define PAL_MAGENTA  0x5u
+#define PAL_CYAN     0x6u
+#define PAL_WHITE    0x7u
+#define PAL_GRAY     0x8u
+#define PAL_BRED     0x9u
+#define PAL_BGREEN   0xAu
+#define PAL_BYELLOW  0xBu
+#define PAL_BBLUE    0xCu
+#define PAL_BMAGENTA 0xDu
+#define PAL_BCYAN    0xEu
+#define PAL_BWHITE   0xFu
 
 int main(void)
 {
-    *gpu_addr = 0; // Reset GPU
-    *gpu_control = 0x4400;
+    hd63484_config_t cfg;
+
+    cfg.gbm       = GBM_4BPP;
+    cfg.ccr_ie    = 0;
+
+    cfg.acm       = ACM_SINGLE;
+    cfg.gai       = GAI_INC1;      /* 1 word/cycle = 4 pixels at 4bpp */
+    cfg.rsm       = RSM_NONINTERLACE;
+    cfg.ram_mode  = 1;             /* static RAM, no DRAM refresh      */
+    cfg.acp       = 0;             /* display priority                 */
+
+    cfg.dcr       = DCR_DSP | DCR_SE1;  /* Base screen on, standard DISP */
+
+    cfg.hc        = HTOTAL;
+    cfg.hsw       = HSYNC_W;
+    cfg.hds       = HDISP_S;
+    cfg.hdw       = HDISP_W;
+
+    cfg.vc        = VTOTAL;
+    cfg.vsw       = VSYNC_W;
+    cfg.vds       = VDISP_S;
+    cfg.sp1       = SCREEN_RASTERS;
+
+    cfg.mwr1      = MEM_WIDTH;
+    cfg.sar1      = VRAM_BASE;
+    cfg.draw_base = VRAM_BASE;
+
+    hd63484_init(&cfg);
+
+    /* 1. Clear to black */
+    hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
+
+    /* 2. White border */
+    hd63484_set_color1(PAL_WHITE);
+    hd63484_amove(0, 0);
+    hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+
+    /* 3. Red filled rectangle */
+    hd63484_fill_rect(20, 20, 100, 80, PAL_RED);
+
+    /* 4. Cyan diagonal line */
+    hd63484_draw_line(0, 0, SCREEN_W - 1, SCREEN_H - 1, PAL_CYAN);
+
+    /* 5. Green circle at screen centre */
+    hd63484_set_color1(PAL_GREEN);
+    hd63484_amove(192, 140);
+    hd63484_crcl(60, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+
+    /* 6. Flood fill circle with blue */
+    hd63484_set_edge_color(PAL_GREEN);
+    hd63484_set_color1(PAL_BLUE);
+    hd63484_amove(192, 140);
+    hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+
+    /* 7. Checkerboard pattern blit */
+    {
+        uint16_t checker[16];
+        uint8_t  i;
+        for (i = 0; i < 16; i++)
+            checker[i] = (i & 1) ? 0x5555u : 0xAAAAu;
+        hd63484_wptn(0, 15, checker);
+        hd63484_wpr(PR_PRC0, 0x0000u);
+        hd63484_wpr(PR_PRC1, 0x0000u);
+        hd63484_wpr(PR_PRC2, 0xF0F0u); /* PEY=15,PEX=15,no zoom */
+        hd63484_set_color0(PAL_BLACK);
+        hd63484_set_color1(PAL_WHITE);
+        hd63484_amove(260, 41);  /* bottom of 32-row pattern block in screen coords */
+        hd63484_ptn(32, 32, 0, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+
+    }
+
+    for (;;) ;
     return 0;
 }
