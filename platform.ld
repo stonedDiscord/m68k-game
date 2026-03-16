@@ -18,8 +18,8 @@
  */
 _rom_base = 0x000000;
 _rom_sz   = 0x020000;
-_ram_base = 0xfc0000;
-_ram_sz   = 0x03f000;
+_ram_base = 0xffc000;
+_ram_sz   = 0x003f00;
 
 _stack_sz = 4K;
 
