@@ -139,6 +139,10 @@ SECTIONS {
  *   . = 0x140;
  *   LONG(ABSOLUTE(NameOfHandlerFunction));
  */
+
+    . = 0x140;
+    LONG(ABSOLUTE(duartInterrupt));
+
     } > evt
 
     .text : {

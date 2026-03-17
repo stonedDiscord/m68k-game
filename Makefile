@@ -15,7 +15,7 @@
 #
 #   SRCS=main.c user.c \
 #        driver.s
-SRCS=main.c gpu.c
+SRCS=main.c gpu.c duart.c
 
 # Specify the CPU type that you are targeting your build towards.
 #
