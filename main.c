@@ -76,6 +76,24 @@
 #define PAL_BCYAN    0xEu
 #define PAL_BWHITE   0xFu
 
+#define BTN_UP      (1u << 1)
+#define BTN_RIGHT   (1u << 4)
+#define BTN_DOWN    (1u << 7)
+#define BTN_LEFT    (1u << 10)
+
+volatile uint16_t *input_port = (volatile uint16_t *)0x800100;
+
+uint16_t read_inputs(void)
+{
+    uint16_t result = 0;
+    uint8_t i;
+    for (i = 0; i < 16; i++) {
+        if (!(*input_port & 0x0004))   /* bit 2, active low */
+            result |= (1u << i);
+    }
+    return result;
+}
+
 int main(void)
 {
     hd63484_config_t cfg;
@@ -110,64 +128,55 @@ int main(void)
     hd63484_set_font(font8x8);
 
     /* 1. Clear to black */
-    hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
+    hd63484_clear_screen(PAL_BLUE, SCREEN_W, SCREEN_H);
 
     /* 2. White border */
     hd63484_set_color1(PAL_WHITE);
     hd63484_amove(0, 0);
     hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 
-    /* 3. Red filled rectangle */
-    hd63484_fill_rect(20, 20, 100, 80, PAL_RED);
-
     /* 4. Cyan diagonal line */
     hd63484_draw_line(0, 0, SCREEN_W - 1, SCREEN_H - 1, PAL_CYAN);
-
-    /* 5. Green circle at screen centre */
-    hd63484_set_color1(PAL_GREEN);
-    hd63484_amove(192, 140);
-    hd63484_crcl(60, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-
-    /* 6. Flood fill circle with blue */
-    hd63484_set_edge_color(PAL_GREEN);
-    hd63484_set_color1(PAL_BLUE);
-    hd63484_amove(192, 140);
-    hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-
-    /* 7. Checkerboard pattern blit */
-    {
-        uint16_t checker[16];
-        uint8_t  i;
-        for (i = 0; i < 16; i++)
-            checker[i] = (i & 1) ? 0x5555u : 0xAAAAu;
-        hd63484_wptn(0, 15, checker);
-        hd63484_wpr(PR_PRC0, 0x0000u);
-        hd63484_wpr(PR_PRC1, 0x0000u);
-        hd63484_wpr(PR_PRC2, 0xF0F0u); /* PEY=15,PEX=15,no zoom */
-        hd63484_set_color0(PAL_BLACK);
-        hd63484_set_color1(PAL_WHITE);
-        hd63484_amove(260, 41);  /* bottom of 32-row pattern block in screen coords */
-        hd63484_ptn(32, 32, 0, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-
-    }
-
-    /* Draw some text */
-    hd63484_draw_string(8,  8,  "HELLO WORLD",     PAL_WHITE,  PAL_BLACK);
-    hd63484_draw_string(8,  20, "0123456789",       PAL_YELLOW, PAL_BLACK);
-    hd63484_draw_string(8,  32, "SCORE: 001337",    PAL_CYAN,   PAL_BLACK);
-
-    /* Single character */
-    hd63484_draw_char(8, 50, 'A', PAL_RED,   PAL_BLACK);
-    hd63484_draw_char(16,50, 'B', PAL_GREEN, PAL_BLACK);
-    hd63484_draw_char(24,50, 'C', PAL_BLUE,  PAL_BLACK);
+    hd63484_draw_line(0, SCREEN_H - 1, SCREEN_W - 1, 0, PAL_MAGENTA);
 
     /* Text on a coloured background */
-    hd63484_fill_rect(8, 64, 128, 12, PAL_RED);
-    hd63484_draw_string(8, 64, "RED BACKGROUND", PAL_WHITE, PAL_RED);
+    hd63484_draw_string(8, 8, "Es wurde ein Problem festgestellt.", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 16, "Windows wurde heruntergefahren, damit der", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 24, "Computer nicht beschadigt wird.", PAL_WHITE, PAL_BLUE);
 
-    setup_duart();
-    putchar_("E");
+    hd63484_draw_string(8, 40, "Wenn Sie diese Fehlermeldung zum ersten Mal", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 48, "angezeigt bekommen, sollten Sie den Computer", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 56, "neu starten. Wenn diese Meldung weiterhin", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 64, "angezeigt wird, mussen Sie folgenden", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 72, "Schritten folgen:", PAL_WHITE, PAL_BLUE);
 
-    for (;;) ;
+    hd63484_draw_string(8, 80, "Uberprufen Sie den Computer auf Viren. Entfernen Sie alle", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 88, "neu installierten Festplatten bzw. Festplattencontroller.", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 96, "Stellen Sie sicher, dass die Festplatte richtig konfiguriert", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 104, "und beendet ist. Fuhren Sie CHKDSK /F aus, um festzustellen,", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 112, "ob die Festplatte beschadigt ist, und starten Sie anschliessend", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 120, "den Computer erneut.", PAL_WHITE, PAL_BLUE);
+
+    hd63484_draw_string(8, 144, "Technische Information:", PAL_WHITE, PAL_BLUE);
+
+    hd63484_draw_string(8, 152, "*** STOP: 0x0000007B", PAL_WHITE, PAL_RED);
+    hd63484_draw_string(8, 160, "INACCESSIBLE_BOOT_DEVICE", PAL_WHITE, PAL_RED);
+
+    //setup_duart();
+    //putchar_("E");
+
+    uint16_t input_state;
+
+    for (;;) {
+        input_state = read_inputs();
+        hd63484_draw_string(8, 180, "Input state: 0x", PAL_WHITE, PAL_BLACK);
+        char hex_str[5];
+        for (int i = 0; i < 4; i++) {
+            uint8_t nibble = (input_state >> (12 - 4*i)) & 0xF;
+            hex_str[i] = (nibble < 10) ? ('0' + nibble) : ('A' + nibble - 10);
+        }
+        hex_str[4] = '\0';
+        hd63484_draw_string(8 + 16*8, 180, hex_str, PAL_YELLOW, PAL_BLACK);
+    }
     return 0;
 }
