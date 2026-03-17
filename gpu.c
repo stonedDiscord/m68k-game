@@ -562,7 +562,7 @@ void hd63484_set_solid_pattern(void)
         0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF
     };
     /* Write all 16 words starting at pattern RAM address 0 */
-    hd63484_wptn(0, 15, solid);
+    hd63484_wptn(0, 16, solid);
 
     /* PRC: full 16×16 extents, no zoom
      * Pr07 layout: [15:12]=PEY [11:8]=PZY [7:4]=PEX [3:0]=PZX
