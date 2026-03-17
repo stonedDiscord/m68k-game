@@ -860,6 +860,13 @@ void hd63484_set_font(const uint8_t (*font)[8])
     hd63484_font = font;
 }
 
+unsigned char reverse(unsigned char b) {
+   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+   b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+   b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+   return b;
+}
+
 /*
  * hd63484_draw_char – draw one 8×8 character at screen position (sx, sy).
  *
@@ -890,7 +897,7 @@ void hd63484_draw_char(int16_t sx, int16_t sy, char c,
      * of the cell on screen.
      * Rows 8–15 are zeroed (unused — cell is only 8 rows tall). */
     for (row = 0; row < 8; row++)
-        pram[row] = (uint16_t)glyph[7 - row]; /* reverse: row 7 first */
+        pram[row] = (uint16_t)reverse(glyph[7 - row]); /* reverse: row 7 first */
     for (row = 8; row < 16; row++)
         pram[row] = 0x0000;
 
