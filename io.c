@@ -36,3 +36,15 @@ uint16_t read_input(uint8_t n)
 {
     return mux[n];
 }
+
+void uint16_to_hex(uint16_t value, char *out_str, size_t out_len)
+{
+    if (out_len < 5) {  // Need at least 4 hex digits + null terminator
+        return;
+    }
+    for (int i = 0; i < 4; i++) {
+        uint8_t nibble = (value >> (12 - 4*i)) & 0xF;
+        out_str[i] = (nibble < 10) ? ('0' + nibble) : ('A' + nibble - 10);
+    }
+    out_str[4] = '\0';
+}

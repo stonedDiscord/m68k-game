@@ -85,6 +85,8 @@
 #define BTN_DOWN    (1u << 7)
 #define BTN_LEFT    (1u << 10)
 
+#include <stdio.h>
+
 int main(void)
 {
     hd63484_config_t cfg;
@@ -153,22 +155,39 @@ int main(void)
     hd63484_draw_string(8, 152, "*** STOP: 0x0000007B", PAL_WHITE, PAL_RED);
     hd63484_draw_string(8, 160, "INACCESSIBLE_BOOT_DEVICE", PAL_WHITE, PAL_RED);
 
-    //setup_duart();
-    //putchar_("E");
+     //setup_duart();
+     //putchar_("E");
 
-    uint16_t input_state;
-
-    for (;;) {
-        scan_inputs();
-        uint16_t input_state = read_input(0);
-        hd63484_draw_string(8, 180, "Input state: 0x", PAL_WHITE, PAL_BLACK);
-        char hex_str[5];
-        for (int i = 0; i < 4; i++) {
-            uint8_t nibble = (input_state >> (12 - 4*i)) & 0xF;
-            hex_str[i] = (nibble < 10) ? ('0' + nibble) : ('A' + nibble - 10);
-        }
-        hex_str[4] = '\0';
-        hd63484_draw_string(8 + 16*8, 180, hex_str, PAL_YELLOW, PAL_BLACK);
-    }
+     for (;;) {
+         scan_inputs();
+         for (int n = 0; n < 8; n++) {
+             uint16_t input_state = read_input(n);
+             // Draw label "Input n: 0xXXXX"
+             char label[16];
+             // We'll build the string manually to avoid sprintf if not available.
+             // Format: "Input 0: 0xXXXX"
+             // We know n is single digit.
+             label[0] = 'I';
+             label[1] = 'n';
+             label[2] = 'p';
+             label[3] = 'u';
+             label[4] = 't';
+             label[5] = ' ';
+             label[6] = '0' + n;
+             label[7] = ':';
+             label[8] = ' ';
+             label[9] = '0';
+             label[10] = 'x';
+             // Now convert input_state to hex and place at label[11]..label[14]
+             char hex_str[5];
+             uint16_to_hex(input_state, hex_str, 5);
+             for (int i = 0; i < 4; i++) {
+                 label[11 + i] = hex_str[i];
+             }
+             label[15] = '\0';
+             // Draw at position (8, 180 + n*10)
+             hd63484_draw_string(8, 180 + n*10, label, PAL_WHITE, PAL_BLACK);
+         }
+     }
     return 0;
 }

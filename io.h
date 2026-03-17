@@ -2,6 +2,7 @@
 #define INPUT_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 static volatile uint8_t * const io1_device = (volatile uint8_t *)0x800101;
 static volatile uint8_t * const  o2_device = (volatile uint8_t *)0x8000C1;
@@ -14,5 +15,6 @@ static volatile uint8_t * const  o2_device = (volatile uint8_t *)0x8000C1;
 
 void scan_inputs(void);
 uint16_t read_input(uint8_t n);
+void uint16_to_hex(uint16_t value, char *out_str, size_t out_len);
 
 #endif /* INPUT_H */
