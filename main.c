@@ -24,6 +24,7 @@
  */
 
 #include "gpu.h"
+#include "font.h"   /* font8x8[128][8] */
 
 /* ---- Screen geometry ---- */
 #define SCREEN_W    384
@@ -106,6 +107,8 @@ int main(void)
 
     hd63484_init(&cfg);
 
+    hd63484_set_font(font8x8);
+
     /* 1. Clear to black */
     hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
 
@@ -147,6 +150,20 @@ int main(void)
         hd63484_ptn(32, 32, 0, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 
     }
+
+    /* Draw some text */
+    hd63484_draw_string(8,  8,  "HELLO WORLD",     PAL_WHITE,  PAL_BLACK);
+    hd63484_draw_string(8,  20, "0123456789",       PAL_YELLOW, PAL_BLACK);
+    hd63484_draw_string(8,  32, "SCORE: 001337",    PAL_CYAN,   PAL_BLACK);
+
+    /* Single character */
+    hd63484_draw_char(8, 50, 'A', PAL_RED,   PAL_BLACK);
+    hd63484_draw_char(16,50, 'B', PAL_GREEN, PAL_BLACK);
+    hd63484_draw_char(24,50, 'C', PAL_BLUE,  PAL_BLACK);
+
+    /* Text on a coloured background */
+    hd63484_fill_rect(8, 64, 128, 12, PAL_RED);
+    hd63484_draw_string(8, 64, "RED BACKGROUND", PAL_WHITE, PAL_RED);
 
     setup_duart();
     putchar_("E");
