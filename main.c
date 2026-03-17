@@ -148,6 +148,9 @@ int main(void)
 
     }
 
+    setup_duart();
+    putchar("E");
+
     for (;;) ;
     return 0;
 }
