@@ -46,11 +46,6 @@
 #define iRxRDY 0x02	/* Receiver ISR RxRDY bit mask */
 #define iCTRDY 0x08	/* Counter/ timer ISR ready bit mask */
 
-// 68681 counter
-#define SECONDS 300
-int counter = 0;
-int seconds = 0;
-
 // functions
 void setup_duart(void);
 char getchar_(void);

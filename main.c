@@ -23,8 +23,12 @@
  *   -> 4-bit IRGB palette (bit3=intensity, bits2-0=RGB)
  */
 
+#include "duart.h"
+
 #include "gpu.h"
 #include "font.h"   /* font8x8[128][8] */
+
+#include "io.h"
 
 /* ---- Screen geometry ---- */
 #define SCREEN_W    384
@@ -80,19 +84,6 @@
 #define BTN_RIGHT   (1u << 4)
 #define BTN_DOWN    (1u << 7)
 #define BTN_LEFT    (1u << 10)
-
-volatile uint16_t *input_port = (volatile uint16_t *)0x800100;
-
-uint16_t read_inputs(void)
-{
-    uint16_t result = 0;
-    uint8_t i;
-    for (i = 0; i < 16; i++) {
-        if (!(*input_port & 0x0004))   /* bit 2, active low */
-            result |= (1u << i);
-    }
-    return result;
-}
 
 int main(void)
 {
@@ -168,7 +159,8 @@ int main(void)
     uint16_t input_state;
 
     for (;;) {
-        input_state = read_inputs();
+        scan_inputs();
+        uint16_t input_state = read_input(0);
         hd63484_draw_string(8, 180, "Input state: 0x", PAL_WHITE, PAL_BLACK);
         char hex_str[5];
         for (int i = 0; i < 4; i++) {

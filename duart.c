@@ -3,20 +3,9 @@
 // ISR - see platform.ld
 void __attribute__((interrupt))
 duartInterrupt(void) {
-	char c;    
-    //DOUT = ISR;
+	char c;
     if (ISR & iRxRDY) {
         c = RBRA;	
-    }
-
-    if (ISR & iCTRDY) {
-        // Read from STOP_CNTR port to clear interrupt flag
-        c = STOP_CNTR;  
-        counter++;
-        if (counter == SECONDS) {
-            seconds++;
-            counter = 0;
-        }
     }
 }
 
