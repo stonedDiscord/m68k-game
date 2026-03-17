@@ -13,6 +13,10 @@ jobs:
       with:
         repository: 'tomstorey/m68k_bare_metal'
         path: 'm68k_bare_metal'
+    - uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: libmpc-dev libmpfr-dev
+        version: 1.0
     - name: Setup compiler
       working-directory: m68k_bare_metal
       run: |
