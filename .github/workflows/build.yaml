@@ -22,7 +22,10 @@ jobs:
       run: |
         chmod +x *.sh
         ./linux-build-toolchain.sh
-        cd libmetal
+        echo "$GITUB_WORKSPACE/m68k_bare_metal/toolchain/m68k-eabi-elf-13.4.0/bin/" >> "$GITHUB_PATH"
+    - name: Build libmetal
+      working-directory: m68k_bare_metal/libmetal
+      run: |
         make
     - name: Build
       working-directory: m68k-game
