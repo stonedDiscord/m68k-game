@@ -44,7 +44,7 @@
  *
  * Memory width = SCREEN_W / 4 px_per_word = 96 words per line
  */
-#define HTOTAL         383
+#define HTOTAL         384
 #define HSYNC_W          2
 #define HDISP_S          0
 #define HDISP_W         95
