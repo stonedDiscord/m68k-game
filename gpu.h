@@ -432,9 +432,22 @@ static inline int16_t hd63484_sy(int16_t screen_y)
     return hd63484_screen_height - 1 - screen_y;
 }
 
-/* Colour setup
- * color = 4-bit palette index (0-15). The register value is automatically
- * replicated across all nibbles for 4bpp mode (see hd63484_color_reg()). */
+/* ---------------------------------------------------------------------------
+ * hd63484_color_reg – build a CL0 / CL1 / EDG register value from a 4bpp index.
+ *
+ * MAME extracts the per-pixel color as:
+ *   cl = (m_cl >> ((x % ppw) * bpp)) & mask
+ * For 4bpp: ppw=4, bpp=4 — so the same 4-bit index must sit in all four nibbles.
+ * Passing a plain index (e.g. 1 for red) only fills bits 3:0; every other column
+ * draws color 0 (black), producing vertical stripes.
+ * ---------------------------------------------------------------------------*/
+static inline uint16_t hd63484_color_reg(uint8_t index)
+{
+    uint16_t n = (uint16_t)(index & 0x0Fu);
+    return n | (n << 4) | (n << 8) | (n << 12);
+}
+
+/* Colour setup – pass a 4-bit palette index; nibble replication is automatic */
 void     hd63484_set_color0(uint8_t color);
 void     hd63484_set_color1(uint8_t color);
 void     hd63484_set_edge_color(uint8_t color);
@@ -529,5 +542,24 @@ void     hd63484_fill_rect(int16_t x, int16_t y,
 void     hd63484_draw_line(int16_t x0, int16_t y0,
                             int16_t x1, int16_t y1,
                             uint8_t color);
+
+/* ---------------------------------------------------------------------------
+ * Text rendering  (8x8 bitmap font via Pattern RAM PTN command)
+ *
+ * Font data must be a uint8_t [128][8] table where each byte is one
+ * row of the glyph, MSB = leftmost pixel.  Pass a pointer to your
+ * font table once with hd63484_set_font(); subsequent draw_char /
+ * draw_string calls use it automatically.
+ *
+ * Coordinates are screen-space (y=0 = top row, y increases downward).
+ * Each character cell is 8×8 pixels.  Characters are clipped if they
+ * would extend beyond (SCREEN_W-1, SCREEN_H-1).
+ * ---------------------------------------------------------------------------*/
+void hd63484_set_font(const uint8_t (*font)[8]);
+void hd63484_draw_char  (int16_t sx, int16_t sy, char c,
+                          uint8_t fg, uint8_t bg);
+void hd63484_draw_string(int16_t sx, int16_t sy, const char *str,
+                          uint8_t fg, uint8_t bg);
+
 
 #endif /* GPU_H */
