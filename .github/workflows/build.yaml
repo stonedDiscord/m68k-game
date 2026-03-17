@@ -22,7 +22,7 @@ jobs:
       run: |
         chmod +x *.sh
         ./linux-build-toolchain.sh
-        echo "$GITUB_WORKSPACE/m68k_bare_metal/toolchain/m68k-eabi-elf-13.4.0/bin/" >> "$GITHUB_PATH"
+        echo "${{ github.workspace }}/m68k_bare_metal/toolchain/m68k-eabi-elf-13.4.0/bin/" >> "$GITHUB_PATH"
     - name: Build libmetal
       working-directory: m68k_bare_metal/libmetal
       run: |
@@ -31,6 +31,6 @@ jobs:
       working-directory: m68k-game
       run: make all
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: m68k-game/bmbinary
