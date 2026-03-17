@@ -21,38 +21,6 @@ duartInterrupt(void) {
     }
 }
 
-// circular buffer
-int circ_bbuf_push(char data) {
-    short int cbuffer_next;
-
-    cbuffer_next = cbuffer_head + 1;  // next is where head will point to after this write.
-    if (cbuffer_next >= CBUFFER_LEN)
-        cbuffer_next = 0;
-
-    if (cbuffer_next == cbuffer_tail)  // if the head + 1 == tail, circular buffer is full
-        return -1;
-
-    cbuffer_data[cbuffer_head] = data;  // Load data and then move
-    cbuffer_head = cbuffer_next;             // head to next data offset.
-    return 0;  // return success to indicate successful push.
-}
-
-int circ_bbuf_pop(char *data) {
-    short int cbuffer_next;
-
-    if (cbuffer_head == cbuffer_tail)  // if the head == tail, we don't have any data
-        return -1;
-
-    cbuffer_next = cbuffer_tail + 1;  // next is where tail will point to after this read.
-    if(cbuffer_next >= CBUFFER_LEN)
-        cbuffer_next = 0;
-
-    *data = cbuffer_data[cbuffer_tail];  // Read data and then move
-    cbuffer_tail = cbuffer_next;              // tail to next offset.
-    return 0;  // return success to indicate successful push.
-}
-
-
 // duart MC68681
 void setup_duart(void) {
 	CRA = 0x30; /* Reset port A transmitter */

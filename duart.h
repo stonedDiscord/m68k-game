@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 // MC68681 config
-#define DUART_BASE 0x900001 				/* Base of I/O port addresses */
+#define DUART_BASE 0x800180 				/* Base of I/O port addresses */
 #define MR1A (* (volatile char *) (DUART_BASE+0) ) 	/* Mode register 1A 		(R/W) */
 #define MR2A (* (volatile char *) (DUART_BASE+0) ) 	/* Mode register 2A 		(R/W) */
 #define SRA  (* (volatile char *) (DUART_BASE+2) ) 	/* Status Register A 		(R)   */
@@ -46,26 +46,14 @@
 #define iRxRDY 0x02	/* Receiver ISR RxRDY bit mask */
 #define iCTRDY 0x08	/* Counter/ timer ISR ready bit mask */
 
-// digital output on leds config
-#define DOUT_BASE 0x800001
-#define DOUT (* (char *) (DOUT_BASE+0) ) 
-
 // 68681 counter
 #define SECONDS 300
 int counter = 0;
 int seconds = 0;
 
-// circular buffer
-#define CBUFFER_LEN 32
-char cbuffer_data[32] = {0};
-short int cbuffer_head = 0;
-short int cbuffer_tail = 0;
-
 // functions
 void setup_duart(void);
 char getchar_(void);
 void putchar_(char c);
-int circ_bbuf_push(char data);
-int circ_bbuf_pop(char *data);
 
 #endif /* DUART_H */
