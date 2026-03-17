@@ -6,8 +6,7 @@ duartInterrupt(void) {
 	char c;    
     //DOUT = ISR;
     if (ISR & iRxRDY) {
-        c = RBRA;
-        circ_bbuf_push(c);		
+        c = RBRA;	
     }
 
     if (ISR & iCTRDY) {
