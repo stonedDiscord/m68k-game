@@ -24,7 +24,7 @@
  */
 
 #include "duart.h"
-
+#include "audio.h"
 #include "gpu.h"
 #include "font.h"   /* font8x8[128][8] */
 
@@ -156,6 +156,10 @@ int main(void)
     hd63484_draw_string(8, 160, "INACCESSIBLE_BOOT_DEVICE", PAL_WHITE, PAL_RED);
 
     setup_duart();
+
+    write_ym2149(YM_REG_AMP_A , 0x0F); // Enable tone on channel A
+    write_ym2149(YM_REG_TONE_A_COARSE, 0x01);
+    write_ym2149(YM_REG_MIXER, 0x8E); // Enable tone on channel A
     // putchar_("E");
 
     char recv;
@@ -192,6 +196,10 @@ int main(void)
             label[15] = '\0';
             hd63484_draw_string(8, 180 + n*10, label, PAL_WHITE, PAL_BLACK);
         }
+        hd63484_draw_string(150, 180, "YM2149A", PAL_WHITE, PAL_BLACK);
+        hd63484_draw_string(220, 180, read_ioa(), PAL_WHITE, PAL_BLACK);
+        hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
+        hd63484_draw_string(220, 190, read_iob(), PAL_WHITE, PAL_BLACK);
         recv = getchar_();
         if (recv != 0)
         {
