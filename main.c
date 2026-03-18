@@ -156,7 +156,9 @@ int main(void)
     hd63484_draw_string(8, 160, "INACCESSIBLE_BOOT_DEVICE", PAL_WHITE, PAL_RED);
 
      setup_duart();
-     putchar_("E");
+     //putchar_("E");
+
+     char recv;
 
      for (;;) {
          scan_inputs();
@@ -187,7 +189,12 @@ int main(void)
              label[15] = '\0';
              // Draw at position (8, 180 + n*10)
              hd63484_draw_string(8, 180 + n*10, label, PAL_WHITE, PAL_BLACK);
-         }
+        }
+        recv = getchar_();
+             if (recv != 0) {
+                 //putchar_(recv); // Echo back the received character
+                 hd63484_draw_string(200, 180, recv, PAL_YELLOW, PAL_BLACK);
+             }
      }
     return 0;
 }
