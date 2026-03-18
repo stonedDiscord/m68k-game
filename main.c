@@ -155,8 +155,8 @@ int main(void)
     hd63484_draw_string(8, 152, "*** STOP: 0x0000007B", PAL_WHITE, PAL_RED);
     hd63484_draw_string(8, 160, "INACCESSIBLE_BOOT_DEVICE", PAL_WHITE, PAL_RED);
 
-     //setup_duart();
-     //putchar_("E");
+     setup_duart();
+     putchar_("E");
 
      for (;;) {
          scan_inputs();
