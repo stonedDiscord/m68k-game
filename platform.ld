@@ -140,7 +140,7 @@ SECTIONS {
  *   LONG(ABSOLUTE(NameOfHandlerFunction));
  */
 
-    . = 0x140;
+    . = 0x104;
     LONG(ABSOLUTE(duartInterrupt));
 
     } > evt
