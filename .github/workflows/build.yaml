@@ -1,38 +1,17 @@
 name: Build
 on:
-  [push, pull_request]
+  [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/stoneddiscord/m68k_bare_metal:master
     steps:
     - uses: actions/checkout@v6
-      with:
-        path: 'm68k-game'
-    - name: Download compiler
-      uses: actions/checkout@v6
-      with:
-        repository: 'stonedDiscord/m68k_bare_metal'
-        path: 'm68k_bare_metal'
-    - uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: libmpc-dev libmpfr-dev 7zip
-        version: 1.0
-    - name: Setup compiler
-      working-directory: m68k_bare_metal
-      run: |
-        chmod +x *.sh
-        ./linux-build-toolchain.sh
-        echo "${{ github.workspace }}/m68k_bare_metal/toolchain/m68k-eabi-elf-13.4.0/bin/" >> "$GITHUB_PATH"
-    - name: Build libmetal
-      working-directory: m68k_bare_metal/libmetal
-      run: |
-        make
     - name: Build
-      working-directory: m68k-game
       run: |
-        make crt
-        make all
+        make rom
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
-        path: m68k-game/bmbinary
+        path: bmbinary*

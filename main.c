@@ -121,7 +121,7 @@ int main(void)
     hd63484_set_font(font8x8);
 
     /* 1. Clear to black */
-    hd63484_clear_screen(PAL_BLUE, SCREEN_W, SCREEN_H);
+    hd63484_clear_screen(PAL_GREEN, SCREEN_W, SCREEN_H);
 
     /* 2. White border */
     hd63484_set_color1(PAL_WHITE);
@@ -133,27 +133,8 @@ int main(void)
     hd63484_draw_line(0, SCREEN_H - 1, SCREEN_W - 1, 0, PAL_MAGENTA);
 
     /* Text on a coloured background */
-    hd63484_draw_string(8, 8, "Es wurde ein Problem festgestellt.", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 16, "Windows wurde heruntergefahren, damit der", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 24, "Computer nicht beschadigt wird.", PAL_WHITE, PAL_BLUE);
-
-    hd63484_draw_string(8, 40, "Wenn Sie diese Fehlermeldung zum ersten Mal", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 48, "angezeigt bekommen, sollten Sie den Computer", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 56, "neu starten. Wenn diese Meldung weiterhin", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 64, "angezeigt wird, mussen Sie folgenden", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 72, "Schritten folgen:", PAL_WHITE, PAL_BLUE);
-
-    hd63484_draw_string(8, 80, "Uberprufen Sie den Computer auf Viren. Entfernen Sie alle", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 88, "neu installierten Festplatten bzw. Festplattencontroller.", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 96, "Stellen Sie sicher, dass die Festplatte richtig konfiguriert", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 104, "und beendet ist. Fuhren Sie CHKDSK /F aus, um festzustellen,", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 112, "ob die Festplatte beschadigt ist, und starten Sie anschliessend", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 120, "den Computer erneut.", PAL_WHITE, PAL_BLUE);
-
-    hd63484_draw_string(8, 144, "Technische Information:", PAL_WHITE, PAL_BLUE);
-
-    hd63484_draw_string(8, 152, "*** STOP: 0x0000007B", PAL_WHITE, PAL_RED);
-    hd63484_draw_string(8, 160, "INACCESSIBLE_BOOT_DEVICE", PAL_WHITE, PAL_RED);
+    hd63484_draw_string(8, 8, "Testprogramm fur STELLA Gerate.", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 16, "Und andere Banditen", PAL_WHITE, PAL_BLUE);
 
     setup_duart();
 
@@ -164,48 +145,48 @@ int main(void)
 
     char recv;
 
-    for (;;)
-    {
+    uint16_t counter = 0;
+
+    do {
         scan_inputs();
         for (int n = 0; n < 8; n++)
         {
             uint16_t input_state = read_input(n);
             // Draw label "Input n: 0xXXXX"
-            char label[16];
-            // We'll build the string manually to avoid sprintf if not available.
-            // Format: "Input 0: 0xXXXX"
-            // We know n is single digit.
-            label[0] = 'I';
-            label[1] = 'n';
-            label[2] = 'p';
-            label[3] = 'u';
-            label[4] = 't';
-            label[5] = ' ';
-            label[6] = '0' + n;
-            label[7] = ':';
-            label[8] = ' ';
-            label[9] = '0';
-            label[10] = 'x';
-            // Now convert input_state to hex and place at label[11]..label[14]
-            char hex_str[5];
-            uint16_to_hex(input_state, hex_str, 5);
-            for (int i = 0; i < 4; i++)
-            {
-                label[11 + i] = hex_str[i];
-            }
-            label[15] = '\0';
+            char label[20];
+            sprintf(label, "Input %d: 0x%04X", n, input_state);
             hd63484_draw_string(8, 180 + n*10, label, PAL_WHITE, PAL_BLACK);
         }
+        char hex_str[5];
         hd63484_draw_string(150, 180, "YM2149A", PAL_WHITE, PAL_BLACK);
-        hd63484_draw_string(220, 180, read_ioa(), PAL_WHITE, PAL_BLACK);
+        sprintf(hex_str, "%04X", read_ioa());
+        hd63484_draw_string(220, 180, hex_str, PAL_WHITE, PAL_BLACK);
         hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
-        hd63484_draw_string(220, 190, read_iob(), PAL_WHITE, PAL_BLACK);
+        sprintf(hex_str, "%04X", read_iob());
+        hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
         recv = getchar_();
         if (recv != 0)
         {
             // putchar_(recv); // Echo back the received character
-            hd63484_draw_string(200, 180, recv, PAL_YELLOW, PAL_BLACK);
+            sprintf(hex_str, "%04X", read_iob());
+            hd63484_draw_string(200, 180, hex_str, PAL_YELLOW, PAL_BLACK);
         }
-    }
+        counter++;
+        if (counter % 1000 == 0)
+        {
+            // Toggle the border color every 1000 iterations
+            uint16_t border_color = (counter / 1000) % 2 == 0 ? PAL_WHITE : PAL_RED;
+            hd63484_set_color1(border_color);
+            hd63484_amove(0, 0);
+            hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+        }
+        write_ym2149(YM_REG_TONE_A_FINE, counter);
+        if (counter == 30000)
+        {
+            // Change the text color after 30000 iterations
+            hd63484_draw_string(8, 8, "Es wurde ein Problem festgestellt.", PAL_YELLOW, PAL_BLUE);
+            counter = 0;
+        }
+    } while (counter < 60000);
     return 0;
 }
