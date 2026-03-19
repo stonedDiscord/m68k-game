@@ -85,7 +85,7 @@ $(BUILDDIR)/%.s.o: %.s
 
 -include $(DEPS)
 
-all: crt bmbinary rom zip
+all: crt bmbinary rom split
 
 crt: crt0.S
 	$(CC) $(CFLAGS) -c -o crt0.o crt0.S
@@ -99,12 +99,42 @@ rom: bmbinary
 	$(OBJCOPY) -O binary bmbinary bmbinary.rom
 	$(OBJCOPY) -O srec bmbinary bmbinary.srec
 
-zip:
-	srec_cat bmbinary.rom -binary -split 2 0 -o skat_tv_version_ts3.1.u2.bin -binary
-	srec_cat bmbinary.rom -binary -split 2 1 -o skat_tv_version_ts3.2.u6.bin -binary
+split: rom
+	srec_cat bmbinary.rom -binary -split 2 0 -o rom.1.u2.bin -binary
+	srec_cat bmbinary.rom -binary -split 2 1 -o rom.2.u6.bin -binary
+
+funlddlx: split
+	cp rom.1.u2.bin fldl_f6_2.bin
+	cp rom.2.u6.bin fldl_f6_1.bin
+	truncate --size=512K fldl_f6_1.bin
+	truncate --size=512K fldl_f6_2.bin
+	7z a funlddlx.zip fldl_f6_1.bin fldl_f6_2.bin
+	rm fldl_f6_1.bin fldl_f6_2.bin
+
+skattva: split
+	cp rom.1.u2.bin skat_tv_version_ts3.1.u2.bin
+	cp rom.2.u6.bin skat_tv_version_ts3.2.u6.bin
 	truncate --size=128K skat_tv_version_ts3.1.u2.bin
 	truncate --size=128K skat_tv_version_ts3.2.u6.bin
 	7z a skattva.zip skat_tv_version_ts3.1.u2.bin skat_tv_version_ts3.2.u6.bin
+	rm skat_tv_version_ts3.1.u2.bin skat_tv_version_ts3.2.u6.bin
+
+skattv: split
+	cp rom.1.u2.bin f2_i.bin
+	cp rom.2.u6.bin f2_ii.bin
+	cp rom.1.u2.bin f1_i.bin
+	cp rom.2.u6.bin f1_ii.bin
+	truncate --size=128K f2_i.bin
+	truncate --size=128K f2_ii.bin
+	truncate --size=128K f1_i.bin
+	truncate --size=128K f1_ii.bin
+	7z a skattv.zip f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
+	rm f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
+
+test: funlddlx
+	cp funlddlx.zip /run/media/stoned/schrott/Roms/mame/roms/
+	cd /run/media/stoned/schrott/msys64/src/mame/
+	/run/media/stoned/schrott/msys64/src/mame/mame funlddlx -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window -debug
 
 dump:
 	$(OBJDUMP) -mm68k:$(CPU) -belf32-m68k -st -j.evt bmbinary

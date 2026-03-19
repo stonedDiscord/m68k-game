@@ -54,6 +54,12 @@ dkms.conf
 .vscode/
 
 bmbinar*
-skat*
+
+*.bin
+*.zip
+
+*.cfg
+nvram/
+snap/
 
 *.pdf
