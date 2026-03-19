@@ -13,6 +13,13 @@ jobs:
       with:
         repository: 'stonedDiscord/m68k_bare_metal'
         path: 'm68k_bare_metal'
+    - name: Cache toolchain
+      uses: actions/cache@v4
+      with:
+        path: m68k_bare_metal/toolchain
+        key: m68k-toolchain-${{ hashFiles('m68k_bare_metal/linux-build-toolchain.sh') }}
+        restore-keys: |
+          m68k-toolchain-
     - uses: awalsh128/cache-apt-pkgs-action@latest
       with:
         packages: libmpc-dev libmpfr-dev 7zip
@@ -21,8 +28,17 @@ jobs:
       working-directory: m68k_bare_metal
       run: |
         chmod +x *.sh
-        ./linux-build-toolchain.sh
+        if [ ! -d "toolchain" ]; then
+          ./linux-build-toolchain.sh
+        fi
         echo "${{ github.workspace }}/m68k_bare_metal/toolchain/m68k-eabi-elf-15.2.0/bin/" >> "$GITHUB_PATH"
+    - name: Build libmetal
+      uses: actions/cache@v4
+      with:
+        path: m68k_bare_metal/libmetal
+        key: libmetal-${{ hashFiles('m68k_bare_metal/libmetal/**') }}
+        restore-keys: |
+          libmetal-
     - name: Build libmetal
       working-directory: m68k_bare_metal/libmetal
       run: |
