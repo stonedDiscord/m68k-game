@@ -164,8 +164,9 @@ int main(void)
 
     char recv;
 
-    for (;;)
-    {
+    uint16_t counter = 0;
+
+    do {
         scan_inputs();
         for (int n = 0; n < 8; n++)
         {
@@ -206,6 +207,21 @@ int main(void)
             // putchar_(recv); // Echo back the received character
             hd63484_draw_string(200, 180, recv, PAL_YELLOW, PAL_BLACK);
         }
-    }
+        counter++;
+        if (counter % 1000 == 0)
+        {
+            // Toggle the border color every 1000 iterations
+            uint16_t border_color = (counter / 1000) % 2 == 0 ? PAL_WHITE : PAL_RED;
+            hd63484_set_color1(border_color);
+            hd63484_amove(0, 0);
+            hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+        }
+        if (counter == 30000)
+        {
+            // Change the text color after 30000 iterations
+            hd63484_draw_string(8, 8, "Es wurde ein Problem festgestellt.", PAL_YELLOW, PAL_BLUE);
+            counter = 0;
+        }
+    } while (counter < 60000);
     return 0;
 }
