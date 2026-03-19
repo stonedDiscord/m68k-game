@@ -13,6 +13,10 @@ jobs:
       with:
         repository: 'stonedDiscord/m68k_bare_metal'
         path: 'm68k_bare_metal'
+    - uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: libmpc-dev libmpfr-dev 7zip
+        version: 1.0
     - name: Cache toolchain
       uses: actions/cache@v5
       with:
@@ -20,10 +24,6 @@ jobs:
         key: m68k-toolchain-${{ hashFiles('m68k_bare_metal/linux-build-toolchain.sh') }}
         restore-keys: |
           m68k-toolchain-
-    - uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: libmpc-dev libmpfr-dev 7zip
-        version: 1.0
     - name: Setup compiler
       working-directory: m68k_bare_metal
       run: |
