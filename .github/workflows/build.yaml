@@ -4,7 +4,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: stoneddiscord/m68k_bare_metal:master
+    container:
+      image: ghcr.io/stoneddiscord/m68k_bare_metal:master
     steps:
     - uses: actions/checkout@v6
     - name: Build
