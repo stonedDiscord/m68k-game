@@ -10,8 +10,7 @@ jobs:
     - uses: actions/checkout@v6
     - name: Build
       run: |
-        make crt
-        make all
+        make rom
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:

@@ -40,8 +40,20 @@ LD=$(PREFIX)-ld
 OBJCOPY=$(PREFIX)-objcopy
 OBJDUMP=$(PREFIX)-objdump
 
-CFLAGS=-m$(CPU) -Wall -Wextra -g -static -I../include -I. -msoft-float -MMD -MP -O -std=c17
-LFLAGS=--script=platform.ld -L../libmetal -lmetal-$(CPU)
+ifndef m68kbm_PATH
+
+ifneq ($(wildcard ../include/.*),)
+    m68kbm_PATH=..
+endif
+
+ifneq ($(wildcard ../m68k_bare_metal/include/.*),)
+    m68kbm_PATH=../m68k_bare_metal
+endif
+
+endif
+
+CFLAGS=-m$(CPU) -Wall -Wextra -g -static -I${m68kbm_PATH}/include -I. -msoft-float -MMD -MP -O -std=c17
+LFLAGS=--script=platform.ld -L${m68kbm_PATH}/libmetal -lmetal-$(CPU)
 
 OBJS=$(patsubst %.c,$(BUILDDIR)/%.c.o,$(SRCS))
 OBJS:=$(patsubst %.S,$(BUILDDIR)/%.S.o,$(OBJS))
@@ -50,7 +62,7 @@ DEPS=$(OBJS:.o=.d)
 
 .PHONY: bmbinary release all crt clean rom dump dumps hexdump
 
-bmbinary: $(OBJS)
+bmbinary: $(OBJS) crt
 	$(LD) -o $@ $(OBJS) $(LFLAGS)
 
 release: CFLAGS+= -DNDEBUG
@@ -73,7 +85,7 @@ $(BUILDDIR)/%.s.o: %.s
 
 -include $(DEPS)
 
-all: bmbinary rom zip
+all: crt bmbinary rom zip
 
 crt: crt0.S
 	$(CC) $(CFLAGS) -c -o crt0.o crt0.S
@@ -83,7 +95,7 @@ clean:
 	rm -rf $(BUILDDIR)/*
 	rm -f bmbinary*
 
-rom:
+rom: bmbinary
 	$(OBJCOPY) -O binary bmbinary bmbinary.rom
 	$(OBJCOPY) -O srec bmbinary bmbinary.srec
 
