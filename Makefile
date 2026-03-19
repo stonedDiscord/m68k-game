@@ -40,7 +40,7 @@ LD=$(PREFIX)-ld
 OBJCOPY=$(PREFIX)-objcopy
 OBJDUMP=$(PREFIX)-objdump
 
-CFLAGS=-m$(CPU) -Wall -Wextra -g -static -I../m68k_bare_metal/include -I. -msoft-float -MMD -MP -O
+CFLAGS=-m$(CPU) -Wall -Wextra -g -static -I../m68k_bare_metal/include -I. -msoft-float -MMD -MP -O -std=c17
 LFLAGS=--script=platform.ld -L../m68k_bare_metal/libmetal -lmetal-$(CPU)
 
 OBJS=$(patsubst %.c,$(BUILDDIR)/%.c.o,$(SRCS))
