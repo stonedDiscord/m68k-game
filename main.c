@@ -197,10 +197,13 @@ int main(void)
             label[15] = '\0';
             hd63484_draw_string(8, 180 + n*10, label, PAL_WHITE, PAL_BLACK);
         }
+        char hex_str[5];
         hd63484_draw_string(150, 180, "YM2149A", PAL_WHITE, PAL_BLACK);
-        hd63484_draw_string(220, 180, read_ioa(), PAL_WHITE, PAL_BLACK);
+        uint16_to_hex(read_ioa(), hex_str, 5);
+        hd63484_draw_string(220, 180, hex_str, PAL_WHITE, PAL_BLACK);
         hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
-        hd63484_draw_string(220, 190, read_iob(), PAL_WHITE, PAL_BLACK);
+        uint16_to_hex(read_iob(), hex_str, 5);
+        hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
         recv = getchar_();
         if (recv != 0)
         {
