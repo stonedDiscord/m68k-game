@@ -32,4 +32,6 @@ void write_ym2149(uint8_t reg, uint8_t value);
 uint8_t read_ioa(void);
 uint8_t read_iob(void);
 
+void audio_update_pt3(void);
+
 #endif /* AUDIO_H */

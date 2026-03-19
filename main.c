@@ -27,8 +27,13 @@
 #include "audio.h"
 #include "gpu.h"
 #include "font.h"   /* font8x8[128][8] */
+#include "pt3player.h"
 
 #include "io.h"
+
+/* Music data from music_data.c */
+extern unsigned char pt3player_main_send_me_an_angel_pt3[];
+extern unsigned int pt3player_main_send_me_an_angel_pt3_len;
 
 /* ---- Screen geometry ---- */
 #define SCREEN_W    384
@@ -140,10 +145,8 @@ int main(void)
 
     setup_duart();
 
-    write_ym2149(YM_REG_AMP_A , 0x0F); // Enable tone on channel A
-    write_ym2149(YM_REG_TONE_A_COARSE, 0x01);
-    write_ym2149(YM_REG_MIXER, 0x8E); // Enable tone on channel A
-    // putchar_("E");
+    /* Initialize PT3 player */
+    func_setup_music(pt3player_main_send_me_an_angel_pt3, pt3player_main_send_me_an_angel_pt3_len, 0, 0);
 
     char recv;
 
@@ -151,6 +154,7 @@ int main(void)
 
     do {
         scan_inputs();
+
         for (int n = 0; n < 8; n++)
         {
             uint16_t input_state = read_input(n);
@@ -166,6 +170,11 @@ int main(void)
         hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
         sprintf(hex_str, "%04X", read_iob());
         hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
+
+        /* Update music every frame (approx 50/60Hz) */
+        func_play_tick(0);
+        audio_update_pt3();
+
         recv = getchar_();
         if (recv != 0)
         {
@@ -182,7 +191,6 @@ int main(void)
             hd63484_amove(0, 0);
             hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
         }
-        write_ym2149(YM_REG_TONE_A_FINE, counter);
         if (counter == 30000)
         {
             // Change the text color after 30000 iterations
