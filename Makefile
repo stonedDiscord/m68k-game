@@ -88,7 +88,8 @@ rom:
 	$(OBJCOPY) -O srec bmbinary bmbinary.srec
 
 zip:
-	python3 -c "data=open('bmbinary.rom','rb').read(); open('skat_tv_version_ts3.1.u2.bin','wb').write(data[0::2]); open('skat_tv_version_ts3.2.u6.bin','wb').write(data[1::2])"
+	srec_cat bmbinary.rom -binary -split 2 0 -o skat_tv_version_ts3.1.u2.bin -binary
+	srec_cat bmbinary.rom -binary -split 2 1 -o skat_tv_version_ts3.2.u6.bin -binary
 	truncate --size=128K skat_tv_version_ts3.1.u2.bin
 	truncate --size=128K skat_tv_version_ts3.2.u6.bin
 	7z a skattva.zip skat_tv_version_ts3.1.u2.bin skat_tv_version_ts3.2.u6.bin
