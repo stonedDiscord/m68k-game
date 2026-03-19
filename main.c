@@ -121,7 +121,7 @@ int main(void)
     hd63484_set_font(font8x8);
 
     /* 1. Clear to black */
-    hd63484_clear_screen(PAL_BLUE, SCREEN_W, SCREEN_H);
+    hd63484_clear_screen(PAL_GREEN, SCREEN_W, SCREEN_H);
 
     /* 2. White border */
     hd63484_set_color1(PAL_WHITE);
@@ -133,27 +133,8 @@ int main(void)
     hd63484_draw_line(0, SCREEN_H - 1, SCREEN_W - 1, 0, PAL_MAGENTA);
 
     /* Text on a coloured background */
-    hd63484_draw_string(8, 8, "Es wurde ein Problem festgestellt.", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 16, "Windows wurde heruntergefahren, damit der", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 24, "Computer nicht beschadigt wird.", PAL_WHITE, PAL_BLUE);
-
-    hd63484_draw_string(8, 40, "Wenn Sie diese Fehlermeldung zum ersten Mal", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 48, "angezeigt bekommen, sollten Sie den Computer", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 56, "neu starten. Wenn diese Meldung weiterhin", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 64, "angezeigt wird, mussen Sie folgenden", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 72, "Schritten folgen:", PAL_WHITE, PAL_BLUE);
-
-    hd63484_draw_string(8, 80, "Uberprufen Sie den Computer auf Viren. Entfernen Sie alle", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 88, "neu installierten Festplatten bzw. Festplattencontroller.", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 96, "Stellen Sie sicher, dass die Festplatte richtig konfiguriert", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 104, "und beendet ist. Fuhren Sie CHKDSK /F aus, um festzustellen,", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 112, "ob die Festplatte beschadigt ist, und starten Sie anschliessend", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 120, "den Computer erneut.", PAL_WHITE, PAL_BLUE);
-
-    hd63484_draw_string(8, 144, "Technische Information:", PAL_WHITE, PAL_BLUE);
-
-    hd63484_draw_string(8, 152, "*** STOP: 0x0000007B", PAL_WHITE, PAL_RED);
-    hd63484_draw_string(8, 160, "INACCESSIBLE_BOOT_DEVICE", PAL_WHITE, PAL_RED);
+    hd63484_draw_string(8, 8, "Testprogramm fur STELLA Gerate.", PAL_WHITE, PAL_BLUE);
+    hd63484_draw_string(8, 16, "Und andere Banditen", PAL_WHITE, PAL_BLUE);
 
     setup_duart();
 
@@ -208,7 +189,8 @@ int main(void)
         if (recv != 0)
         {
             // putchar_(recv); // Echo back the received character
-            hd63484_draw_string(200, 180, recv, PAL_YELLOW, PAL_BLACK);
+            uint16_to_hex(read_iob(), hex_str, 5);
+            hd63484_draw_string(200, 180, hex_str, PAL_YELLOW, PAL_BLACK);
         }
         counter++;
         if (counter % 1000 == 0)
