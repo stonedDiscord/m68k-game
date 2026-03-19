@@ -153,43 +153,22 @@ int main(void)
         {
             uint16_t input_state = read_input(n);
             // Draw label "Input n: 0xXXXX"
-            char label[16];
-            // We'll build the string manually to avoid sprintf if not available.
-            // Format: "Input 0: 0xXXXX"
-            // We know n is single digit.
-            label[0] = 'I';
-            label[1] = 'n';
-            label[2] = 'p';
-            label[3] = 'u';
-            label[4] = 't';
-            label[5] = ' ';
-            label[6] = '0' + n;
-            label[7] = ':';
-            label[8] = ' ';
-            label[9] = '0';
-            label[10] = 'x';
-            // Now convert input_state to hex and place at label[11]..label[14]
-            char hex_str[5];
-            uint16_to_hex(input_state, hex_str, 5);
-            for (int i = 0; i < 4; i++)
-            {
-                label[11 + i] = hex_str[i];
-            }
-            label[15] = '\0';
+            char label[20];
+            sprintf(label, "Input %d: 0x%04X", n, input_state);
             hd63484_draw_string(8, 180 + n*10, label, PAL_WHITE, PAL_BLACK);
         }
         char hex_str[5];
         hd63484_draw_string(150, 180, "YM2149A", PAL_WHITE, PAL_BLACK);
-        uint16_to_hex(read_ioa(), hex_str, 5);
+        sprintf(hex_str, "%04X", read_ioa());
         hd63484_draw_string(220, 180, hex_str, PAL_WHITE, PAL_BLACK);
         hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
-        uint16_to_hex(read_iob(), hex_str, 5);
+        sprintf(hex_str, "%04X", read_iob());
         hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
         recv = getchar_();
         if (recv != 0)
         {
             // putchar_(recv); // Echo back the received character
-            uint16_to_hex(read_iob(), hex_str, 5);
+            sprintf(hex_str, "%04X", read_iob());
             hd63484_draw_string(200, 180, hex_str, PAL_YELLOW, PAL_BLACK);
         }
         counter++;
