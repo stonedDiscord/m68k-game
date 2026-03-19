@@ -14,7 +14,7 @@ jobs:
         repository: 'stonedDiscord/m68k_bare_metal'
         path: 'm68k_bare_metal'
     - name: Cache toolchain
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: m68k_bare_metal/toolchain
         key: m68k-toolchain-${{ hashFiles('m68k_bare_metal/linux-build-toolchain.sh') }}
@@ -32,8 +32,8 @@ jobs:
           ./linux-build-toolchain.sh
         fi
         echo "${{ github.workspace }}/m68k_bare_metal/toolchain/m68k-eabi-elf-15.2.0/bin/" >> "$GITHUB_PATH"
-    - name: Build libmetal
-      uses: actions/cache@v4
+    - name: Cache libmetal
+      uses: actions/cache@v5
       with:
         path: m68k_bare_metal/libmetal
         key: libmetal-${{ hashFiles('m68k_bare_metal/libmetal/**') }}
