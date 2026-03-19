@@ -19,6 +19,10 @@ int16_t hd63484_screen_height = 0;
 volatile uint16_t *hd63484_addr    = (volatile uint16_t *)0x800080; /* RS=0 */
 volatile uint16_t *hd63484_control = (volatile uint16_t *)0x800082; /* RS=1 */
 
+volatile uint8_t *ramdac_index    = (volatile uint8_t *)0x800089;
+volatile uint8_t *ramdac_palette  = (volatile uint8_t *)0x80008b;
+volatile uint8_t *ramdac_mask     = (volatile uint8_t *)0x80008d;
+
 /* ===========================================================================
  * Low-level bus helpers
  * ===========================================================================*/
@@ -929,4 +933,13 @@ void hd63484_draw_string(int16_t sx, int16_t sy, const char *str,
         sx += 8;
         str++;
     }
+}
+
+void ramdac_reset(void)
+{
+    *ramdac_mask = 0x01;
+    *ramdac_index = 0x02;
+    *ramdac_mask = 0x1e;
+    *ramdac_index = 0x00;
+    *ramdac_mask = 0xff;
 }

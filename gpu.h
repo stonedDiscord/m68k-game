@@ -561,5 +561,6 @@ void hd63484_draw_char  (int16_t sx, int16_t sy, char c,
 void hd63484_draw_string(int16_t sx, int16_t sy, const char *str,
                           uint8_t fg, uint8_t bg);
 
+void ramdac_reset(void);
 
 #endif /* GPU_H */

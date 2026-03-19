@@ -118,6 +118,8 @@ int main(void)
 
     hd63484_init(&cfg);
 
+    ramdac_reset();
+
     hd63484_set_font(font8x8);
 
     /* 1. Clear to black */
