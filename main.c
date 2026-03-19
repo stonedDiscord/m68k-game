@@ -216,6 +216,7 @@ int main(void)
             hd63484_amove(0, 0);
             hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
         }
+        write_ym2149(YM_REG_TONE_A_FINE, counter);
         if (counter == 30000)
         {
             // Change the text color after 30000 iterations
