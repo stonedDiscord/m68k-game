@@ -135,10 +135,10 @@ skattv: split
 	7z a skattv.zip f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
 	rm f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
 
-test: skattv
-	cp skattv.zip /run/media/stoned/schrott/Roms/mame/roms/
+test: funlddlx
+	cp funlddlx.zip /run/media/stoned/schrott/Roms/mame/roms/
 	cd /run/media/stoned/schrott/msys64/src/mame/
-	/run/media/stoned/schrott/msys64/src/mame/mame skattv -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window -debug
+	/run/media/stoned/schrott/msys64/src/mame/mame funlddlx -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window
 
 dump:
 	$(OBJDUMP) -mm68k:$(CPU) -belf32-m68k -st -j.evt bmbinary
