@@ -60,6 +60,9 @@ OBJS:=$(patsubst %.S,$(BUILDDIR)/%.S.o,$(OBJS))
 OBJS:=$(patsubst %.s,$(BUILDDIR)/%.s.o,$(OBJS))
 DEPS=$(OBJS:.o=.d)
 
+music_data.c: music/send\ me\ an\ angel.pt3
+	xxd -i "$<" | sed 's/music_send_me_an_angel_pt3/pt3player_main_send_me_an_angel_pt3/g' > $@
+
 .PHONY: bmbinary release all crt clean rom dump dumps hexdump
 
 bmbinary: $(OBJS) crt
@@ -94,6 +97,7 @@ crt: crt0.S
 clean:
 	rm -rf $(BUILDDIR)/*
 	rm -f bmbinary*
+	rm -f music_data.c
 
 rom: bmbinary
 	$(OBJCOPY) -O binary bmbinary bmbinary.rom
