@@ -63,3 +63,6 @@ nvram/
 snap/
 
 *.pdf
+
+music_data.c
+music/track.pt3
