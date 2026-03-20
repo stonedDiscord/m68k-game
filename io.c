@@ -19,10 +19,6 @@ void scan_inputs(void)
         io1_in_raw[i] = *io1_device;   /* latch current channel */
     }
 
-    for (i = 0; i < 8; i++) {
-        mux[i] = 0x0000;
-    }
-
     /* Demux into 8 16-bit words */
     for (i = 0; i < 16; i++) {
         for (j = 0; j < 8; j++)
