@@ -140,8 +140,9 @@ SECTIONS {
  *   LONG(ABSOLUTE(NameOfHandlerFunction));
  */
 
-    . = 0x104;
-    LONG(ABSOLUTE(duartInterrupt));
+    . = 0x100;
+    LONG(ABSOLUTE(vector64)); /* Vector 64 */
+    LONG(ABSOLUTE(duartInterrupt)); /* Vector 65 */
 
     } > evt
 
