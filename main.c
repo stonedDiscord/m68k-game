@@ -92,6 +92,33 @@ extern unsigned int pt3player_main_send_me_an_angel_pt3_len;
 
 #include <stdio.h>
 
+// ISR - see platform.ld
+void __attribute__((interrupt))
+vector64(void) {
+	;
+}
+
+void display_inputs()
+{
+        scan_inputs();
+
+        for (int n = 0; n < 8; n++)
+        {
+            uint16_t input_state = read_input(n);
+            // Draw label "Input n: 0xXXXX"
+            char label[20];
+            sprintf(label, "Input %d: 0x%04X", n, input_state);
+            hd63484_draw_string(8, 180 + n*10, label, PAL_WHITE, PAL_BLACK);
+        }
+        char hex_str[5];
+        hd63484_draw_string(150, 180, "YM2149A", PAL_WHITE, PAL_BLACK);
+        sprintf(hex_str, "%04X", read_ioa());
+        hd63484_draw_string(220, 180, hex_str, PAL_WHITE, PAL_BLACK);
+        hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
+        sprintf(hex_str, "%04X", read_iob());
+        hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
+}
+
 int main(void)
 {
     hd63484_config_t cfg;
@@ -153,25 +180,6 @@ int main(void)
     uint16_t counter = 0;
 
     do {
-        scan_inputs();
-
-        for (int n = 0; n < 8; n++)
-        {
-            uint16_t input_state = read_input(n);
-            // Draw label "Input n: 0xXXXX"
-            char label[20];
-            sprintf(label, "Input %d: 0x%04X", n, input_state);
-            hd63484_draw_string(8, 180 + n*10, label, PAL_WHITE, PAL_BLACK);
-        }
-        char hex_str[5];
-        hd63484_draw_string(150, 180, "YM2149A", PAL_WHITE, PAL_BLACK);
-        sprintf(hex_str, "%04X", read_ioa());
-        hd63484_draw_string(220, 180, hex_str, PAL_WHITE, PAL_BLACK);
-        hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
-        sprintf(hex_str, "%04X", read_iob());
-        hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
-
-        /* Update music every frame (approx 50/60Hz) */
         func_play_tick(0);
         audio_update_pt3();
 
@@ -179,17 +187,14 @@ int main(void)
         if (recv != 0)
         {
             // putchar_(recv); // Echo back the received character
-            sprintf(hex_str, "%04X", read_iob());
-            hd63484_draw_string(200, 180, hex_str, PAL_YELLOW, PAL_BLACK);
+            char ser_str[5];
+            sprintf(ser_str, "%04X", read_iob());
+            hd63484_draw_string(200, 180, ser_str, PAL_YELLOW, PAL_BLACK);
         }
         counter++;
-        if (counter % 1000 == 0)
+        if (counter % 10 == 0)
         {
-            // Toggle the border color every 1000 iterations
-            uint16_t border_color = (counter / 1000) % 2 == 0 ? PAL_WHITE : PAL_RED;
-            hd63484_set_color1(border_color);
-            hd63484_amove(0, 0);
-            hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+            display_inputs();
         }
         if (counter == 30000)
         {
