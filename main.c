@@ -32,8 +32,8 @@
 #include "io.h"
 
 /* Music data from music_data.c */
-extern unsigned char pt3player_main_send_me_an_angel_pt3[];
-extern unsigned int pt3player_main_send_me_an_angel_pt3_len;
+extern unsigned char pt3player_main_track_pt3[];
+extern unsigned int pt3player_main_track_pt3_len;
 
 /* ---- Screen geometry ---- */
 #define SCREEN_W    384
@@ -173,7 +173,7 @@ int main(void)
     setup_duart();
 
     /* Initialize PT3 player */
-    func_setup_music(pt3player_main_send_me_an_angel_pt3, pt3player_main_send_me_an_angel_pt3_len, 0, 0);
+    func_setup_music(pt3player_main_track_pt3, pt3player_main_track_pt3_len, 0, 0);
 
     char recv;
 
