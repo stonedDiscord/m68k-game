@@ -8,6 +8,7 @@
  */
 
 #include "gpu.h"
+#include <stdbool.h>
 
 /* Screen height stored at init time; used by hd63484_sy() for Y-flipping */
 int16_t hd63484_screen_height = 0;
@@ -16,12 +17,12 @@ int16_t hd63484_screen_height = 0;
  * Platform register pointers  (defined here; declared extern in gpu.h)
  * Adjust base addresses for your board's address decoding.
  * ---------------------------------------------------------------------------*/
-volatile uint16_t *hd63484_addr    = (volatile uint16_t *)0x800080; /* RS=0 */
+volatile uint16_t *hd63484_addr = (volatile uint16_t *)0x800080;    /* RS=0 */
 volatile uint16_t *hd63484_control = (volatile uint16_t *)0x800082; /* RS=1 */
 
-volatile uint8_t *ramdac_index    = (volatile uint8_t *)0x800089;
-volatile uint8_t *ramdac_palette  = (volatile uint8_t *)0x80008b;
-volatile uint8_t *ramdac_mask     = (volatile uint8_t *)0x80008d;
+volatile uint8_t *ramdac_index = (volatile uint8_t *)0x800089;
+volatile uint8_t *ramdac_palette = (volatile uint8_t *)0x80008b;
+volatile uint8_t *ramdac_mask = (volatile uint8_t *)0x80008d;
 
 /* ===========================================================================
  * Low-level bus helpers
@@ -107,7 +108,7 @@ void hd63484_wait_ced(void)
  */
 void hd63484_fifo_write(uint16_t word)
 {
-    //hd63484_wait_wfr();
+    // hd63484_wait_wfr();
     *hd63484_control = word;
 }
 
@@ -123,7 +124,7 @@ uint16_t hd63484_fifo_read(void)
 /* Internal helper: select FIFO entry and write a word */
 static inline void fifo_w(uint16_t word)
 {
-    //hd63484_wait_wfr();
+    // hd63484_wait_wfr();
     *hd63484_control = word;
 }
 
@@ -155,7 +156,7 @@ void hd63484_reset(void)
     *hd63484_control = CCR_ABT;
 
     /* Wait until WFE is set — FIFOs are confirmed empty */
-    //hd63484_wait_wfe();
+    // hd63484_wait_wfe();
 
     /* Clear ABT so commands can flow; all interrupt enables off */
     hd63484_write_ar(REG_CCR);
@@ -171,7 +172,7 @@ void hd63484_abort(void)
 {
     hd63484_write_reg(REG_CCR, CCR_ABT);
     /* Wait until WFE set (FIFOs cleared) */
-    //hd63484_wait_wfe();
+    // hd63484_wait_wfe();
 }
 
 /*
@@ -219,19 +220,19 @@ void hd63484_init(const hd63484_config_t *cfg)
     {
         uint16_t ccr = 0;
         ccr |= (uint16_t)(cfg->gbm & 0x7u) << CCR_GBM_SHIFT;
-        ccr |= cfg->ccr_ie & 0x00FFu;  /* interrupt enables in low byte */
+        ccr |= cfg->ccr_ie & 0x00FFu; /* interrupt enables in low byte */
         hd63484_write_reg(REG_CCR, ccr);
     }
 
     /* ---- 3. OMR ---- */
     {
         uint16_t omr = 0;
-        omr |= OMR_MIS;                                          /* single chip = master */
-        omr |= (uint16_t)(cfg->acp    ? 1u : 0u) << 13;         /* ACP */
+        omr |= OMR_MIS;                              /* single chip = master */
+        omr |= (uint16_t)(cfg->acp ? 1u : 0u) << 13; /* ACP */
         /* CSK=01, DSK=01 (1 cycle skew) – safe default for most systems */
         omr |= (1u << OMR_CSK_SHIFT);
         omr |= (1u << OMR_DSK_SHIFT);
-        omr |= (uint16_t)(cfg->ram_mode ? 1u : 0u) << 7;        /* RAM */
+        omr |= (uint16_t)(cfg->ram_mode ? 1u : 0u) << 7; /* RAM */
         omr |= (uint16_t)(cfg->gai & 0x7u) << OMR_GAI_SHIFT;
         omr |= (uint16_t)(cfg->acm & 0x3u) << OMR_ACM_SHIFT;
         omr |= (uint16_t)(cfg->rsm & 0x3u);
@@ -310,31 +311,31 @@ void hd63484_init(const hd63484_config_t *cfg)
      * We write all four screens contiguously starting at rC0.
      * Screens 0, 2, 3 are disabled (zeroed); screen 1 (Base) carries our values.
      */
-    hd63484_write_ar(REG_RAR0);   /* = 0xC0, auto-inc from here */
+    hd63484_write_ar(REG_RAR0); /* = 0xC0, auto-inc from here */
 
     /* Screen 0 (Upper) — disabled, all zero */
-    *hd63484_control = 0x0000;    /* RAR0: no raster offset     */
-    *hd63484_control = 0x0000;    /* MWR0: 0 (disabled)         */
-    *hd63484_control = 0x0000;    /* SAR0H                      */
-    *hd63484_control = 0x0000;    /* SAR0L                      */
+    *hd63484_control = 0x0000; /* RAR0: no raster offset     */
+    *hd63484_control = 0x0000; /* MWR0: 0 (disabled)         */
+    *hd63484_control = 0x0000; /* SAR0H                      */
+    *hd63484_control = 0x0000; /* SAR0L                      */
 
     /* Screen 1 (Base) — active display screen */
-    *hd63484_control = 0x0000;                                /* RAR1: no raster offset  */
-    *hd63484_control = cfg->mwr1 & 0x03FFu;                  /* MWR1: width (CHR=0)     */
+    *hd63484_control = 0x0000;                                  /* RAR1: no raster offset  */
+    *hd63484_control = cfg->mwr1 & 0x03FFu;                     /* MWR1: width (CHR=0)     */
     *hd63484_control = (uint16_t)((cfg->sar1 >> 16) & 0x000Fu); /* SAR1H: addr bits 19–16 */
-    *hd63484_control = (uint16_t)(cfg->sar1 & 0xFFFFu);      /* SAR1L: addr bits 15–0   */
+    *hd63484_control = (uint16_t)(cfg->sar1 & 0xFFFFu);         /* SAR1L: addr bits 15–0   */
 
     /* Screen 2 (Lower) — disabled, all zero */
-    *hd63484_control = 0x0000;    /* RAR2 */
-    *hd63484_control = 0x0000;    /* MWR2 */
-    *hd63484_control = 0x0000;    /* SAR2H */
-    *hd63484_control = 0x0000;    /* SAR2L */
+    *hd63484_control = 0x0000; /* RAR2 */
+    *hd63484_control = 0x0000; /* MWR2 */
+    *hd63484_control = 0x0000; /* SAR2H */
+    *hd63484_control = 0x0000; /* SAR2L */
 
     /* Screen 3 (Window) — disabled, all zero */
-    *hd63484_control = 0x0000;    /* RAR3 */
-    *hd63484_control = 0x0000;    /* MWR3 */
-    *hd63484_control = 0x0000;    /* SAR3H */
-    *hd63484_control = 0x0000;    /* SAR3L */
+    *hd63484_control = 0x0000; /* RAR3 */
+    *hd63484_control = 0x0000; /* MWR3 */
+    *hd63484_control = 0x0000; /* SAR3H */
+    *hd63484_control = 0x0000; /* SAR3L */
 
     /* ---- 7. Drawing parameter setup via FIFO ---- */
 
@@ -422,8 +423,8 @@ void hd63484_wptn(uint8_t pra, uint8_t n, const uint16_t *data)
 {
     uint8_t i;
     hd63484_write_ar(REG_FE);
-    fifo_w(CMD_WPTN | (pra & 0x0Fu));   /* pra in bits 3:0 of opcode */
-    fifo_w((uint16_t)n);                 /* first param = count       */
+    fifo_w(CMD_WPTN | (pra & 0x0Fu)); /* pra in bits 3:0 of opcode */
+    fifo_w((uint16_t)n);              /* first param = count       */
     for (i = 0; i < n; i++)
         fifo_w(data[i]);
 }
@@ -465,16 +466,15 @@ void hd63484_set_origin(uint8_t dn, uint32_t addr, uint8_t dot)
      *   oph = DN[15:14] | DPAH[7:0]  where DPAH = addr[19:12]
      *   opl = DPAL[15:4] | DPD[3:0] where DPAL = addr[11:0], DPD = dot
      * Decoded by MAME as: dpa = (oph & 0xff)<<12 | (opl & 0xfff0)>>4 */
-    uint16_t oph = (uint16_t)((dn   & 0x3u)  << 14) |
-                   (uint16_t)((addr >> 12)    & 0xFFu);
+    uint16_t oph = (uint16_t)((dn & 0x3u) << 14) |
+                   (uint16_t)((addr >> 12) & 0xFFu);
     uint16_t opl = (uint16_t)((addr & 0xFFFu) << 4) |
-                   (uint16_t)(dot   & 0x00Fu);
+                   (uint16_t)(dot & 0x00Fu);
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_ORG);
     fifo_w(oph);
     fifo_w(opl);
 }
-
 
 void hd63484_set_color0(uint8_t color)
 {
@@ -502,7 +502,7 @@ void hd63484_set_compare_color(uint8_t color)
 }
 
 void hd63484_set_area(int16_t xmin, int16_t ymin,
-                       int16_t xmax, int16_t ymax)
+                      int16_t xmax, int16_t ymax)
 {
     hd63484_wpr(PR_ADR_XMIN, (uint16_t)xmin);
     hd63484_wpr(PR_ADR_YMIN, (uint16_t)ymin);
@@ -516,8 +516,8 @@ void hd63484_set_area(int16_t xmin, int16_t ymin,
  */
 void hd63484_set_rwp(uint8_t dn, uint32_t addr)
 {
-    uint16_t hi = (uint16_t)((dn   & 0x3u)  << 14) |
-                  (uint16_t)((addr >> 12)    & 0xFFu);
+    uint16_t hi = (uint16_t)((dn & 0x3u) << 14) |
+                  (uint16_t)((addr >> 12) & 0xFFu);
     uint16_t lo = (uint16_t)((addr & 0xFFFu) << 4);
     hd63484_wpr(PR_RWP_H, hi);
     hd63484_wpr(PR_RWP_L, lo);
@@ -529,10 +529,10 @@ void hd63484_set_rwp(uint8_t dn, uint32_t addr)
  */
 void hd63484_set_dp(uint8_t dn, uint32_t addr, uint8_t dot)
 {
-    uint16_t hi = (uint16_t)((dn   & 0x3u)  << 14) |
-                  (uint16_t)((addr >> 12)    & 0xFFu);
+    uint16_t hi = (uint16_t)((dn & 0x3u) << 14) |
+                  (uint16_t)((addr >> 12) & 0xFFu);
     uint16_t lo = (uint16_t)((addr & 0xFFFu) << 4) |
-                  (uint16_t)(dot   & 0x00Fu);
+                  (uint16_t)(dot & 0x00Fu);
     hd63484_wpr(PR_DP_H, hi);
     hd63484_wpr(PR_DP_L, lo);
 }
@@ -548,8 +548,7 @@ void hd63484_set_solid_pattern(void)
         0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
         0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
         0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF
-    };
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF};
     /* Write all 16 words starting at pattern RAM address 0 */
     hd63484_wptn(0, 16, solid);
 
@@ -569,8 +568,8 @@ void hd63484_set_solid_pattern(void)
 static inline uint16_t draw_flags(uint8_t area, uint8_t col, uint8_t opm)
 {
     return ((uint16_t)(area & 0xE0u)) |
-           ((uint16_t)(col  & 0x18u)) |
-           ((uint16_t)(opm  & 0x07u));
+           ((uint16_t)(col & 0x18u)) |
+           ((uint16_t)(opm & 0x07u));
 }
 
 void hd63484_amove(int16_t x, int16_t y)
@@ -586,11 +585,11 @@ void hd63484_rmove(int16_t dx, int16_t dy)
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_RMOVE);
     fifo_w((uint16_t)dx);
-    fifo_w((uint16_t)(-dy));    /* flip delta too: down in screen = up in chip */
+    fifo_w((uint16_t)(-dy)); /* flip delta too: down in screen = up in chip */
 }
 
 void hd63484_aline(int16_t x, int16_t y,
-                    uint8_t area, uint8_t col, uint8_t opm)
+                   uint8_t area, uint8_t col, uint8_t opm)
 {
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_ALINE | draw_flags(area, col, opm));
@@ -599,7 +598,7 @@ void hd63484_aline(int16_t x, int16_t y,
 }
 
 void hd63484_rline(int16_t dx, int16_t dy,
-                    uint8_t area, uint8_t col, uint8_t opm)
+                   uint8_t area, uint8_t col, uint8_t opm)
 {
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_RLINE | draw_flags(area, col, opm));
@@ -608,7 +607,7 @@ void hd63484_rline(int16_t dx, int16_t dy,
 }
 
 void hd63484_arct(int16_t x, int16_t y,
-                   uint8_t area, uint8_t col, uint8_t opm)
+                  uint8_t area, uint8_t col, uint8_t opm)
 {
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_ARCT | draw_flags(area, col, opm));
@@ -617,7 +616,7 @@ void hd63484_arct(int16_t x, int16_t y,
 }
 
 void hd63484_rrct(int16_t dx, int16_t dy,
-                   uint8_t area, uint8_t col, uint8_t opm)
+                  uint8_t area, uint8_t col, uint8_t opm)
 {
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_RRCT | draw_flags(area, col, opm));
@@ -626,7 +625,7 @@ void hd63484_rrct(int16_t dx, int16_t dy,
 }
 
 void hd63484_afrct(int16_t x, int16_t y,
-                    uint8_t area, uint8_t col, uint8_t opm)
+                   uint8_t area, uint8_t col, uint8_t opm)
 {
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_AFRCT | draw_flags(area, col, opm));
@@ -635,7 +634,7 @@ void hd63484_afrct(int16_t x, int16_t y,
 }
 
 void hd63484_rfrct(int16_t dx, int16_t dy,
-                    uint8_t area, uint8_t col, uint8_t opm)
+                   uint8_t area, uint8_t col, uint8_t opm)
 {
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_RFRCT | draw_flags(area, col, opm));
@@ -648,10 +647,11 @@ void hd63484_rfrct(int16_t dx, int16_t dy,
  * clockwise: non-zero = clockwise (CRCL_CW bit set in opcode bit 8).
  */
 void hd63484_crcl(uint16_t radius, int clockwise,
-                   uint8_t area, uint8_t col, uint8_t opm)
+                  uint8_t area, uint8_t col, uint8_t opm)
 {
     uint16_t op = CMD_CRCL | draw_flags(area, col, opm);
-    if (clockwise) op |= CRCL_CW;
+    if (clockwise)
+        op |= CRCL_CW;
     hd63484_write_ar(REG_FE);
     fifo_w(op);
     fifo_w(radius);
@@ -663,12 +663,13 @@ void hd63484_crcl(uint16_t radius, int clockwise,
  * dx, dy = offset of ellipse centre from current pointer.
  */
 void hd63484_elps(uint16_t a, uint16_t b,
-                   int16_t dx, int16_t dy,
-                   int clockwise,
-                   uint8_t area, uint8_t col, uint8_t opm)
+                  int16_t dx, int16_t dy,
+                  int clockwise,
+                  uint8_t area, uint8_t col, uint8_t opm)
 {
     uint16_t op = CMD_ELPS | draw_flags(area, col, opm);
-    if (clockwise) op |= CRCL_CW;
+    if (clockwise)
+        op |= CRCL_CW;
     hd63484_write_ar(REG_FE);
     fifo_w(op);
     fifo_w(a);
@@ -684,7 +685,7 @@ void hd63484_dot(uint8_t area, uint8_t col, uint8_t opm)
 }
 
 void hd63484_paint(int stop_at_edge,
-                    uint8_t area, uint8_t col, uint8_t opm)
+                   uint8_t area, uint8_t col, uint8_t opm)
 {
     /* PAINT uses CL0, CL1, and EDG — NOT the pattern RAM.
      * MAME stops filling when it hits a pixel equal to EDG, CL0, or CL1.
@@ -697,7 +698,8 @@ void hd63484_paint(int stop_at_edge,
 
     /* Bit 8 of PAINT opcode: E=0 stops at EDG color, E=1 stops at non-EDG */
     uint16_t op = CMD_PAINT | draw_flags(area, col, opm);
-    if (!stop_at_edge) op |= (1u << 8);
+    if (!stop_at_edge)
+        op |= (1u << 8);
     hd63484_write_ar(REG_FE);
     fifo_w(op);
 }
@@ -709,8 +711,8 @@ void hd63484_paint(int stop_at_edge,
  * so = SO bit (pattern scan origin).
  */
 void hd63484_ptn(int16_t sz_x, int16_t sz_y,
-                  uint8_t sl, uint8_t so,
-                  uint8_t area, uint8_t col, uint8_t opm)
+                 uint8_t sl, uint8_t so,
+                 uint8_t area, uint8_t col, uint8_t opm)
 {
     /* PTN opcode: 1101 | 0100 | SL | SO | AREA | COL | OPM */
     uint16_t op = CMD_PTN |
@@ -769,7 +771,7 @@ void hd63484_clr(uint16_t fill, int16_t ax, int16_t ay)
  * ax, ay  = width, height.
  */
 void hd63484_cpy(uint16_t sah, uint16_t sal,
-                  int16_t ax, int16_t ay)
+                 int16_t ax, int16_t ay)
 {
     hd63484_write_ar(REG_FE);
     fifo_w(CMD_CPY);
@@ -781,7 +783,7 @@ void hd63484_cpy(uint16_t sah, uint16_t sal,
 
 /* Polyline – n points (absolute X,Y pairs in xy[]) */
 void hd63484_apll(uint8_t n, const int16_t *xy,
-                   uint8_t area, uint8_t col, uint8_t opm)
+                  uint8_t area, uint8_t col, uint8_t opm)
 {
     uint8_t i;
     hd63484_write_ar(REG_FE);
@@ -793,7 +795,7 @@ void hd63484_apll(uint8_t n, const int16_t *xy,
 
 /* Polygon – n points (absolute X,Y pairs) */
 void hd63484_aplg(uint8_t n, const int16_t *xy,
-                   uint8_t area, uint8_t col, uint8_t opm)
+                  uint8_t area, uint8_t col, uint8_t opm)
 {
     uint8_t i;
     hd63484_write_ar(REG_FE);
@@ -818,7 +820,7 @@ void hd63484_clear_screen(uint8_t color, int16_t w, int16_t h)
     hd63484_set_color0(0x0);
     hd63484_set_color1(color);
     hd63484_set_solid_pattern();
-    hd63484_amove(0, h - 1);                   /* screen bottom-left */
+    hd63484_amove(0, h - 1);                                      /* screen bottom-left */
     hd63484_afrct(w - 1, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE); /* to top-right */
 }
 
@@ -827,13 +829,13 @@ void hd63484_clear_screen(uint8_t color, int16_t w, int16_t h)
  * (x,y) = top-left corner in screen-space; (w,h) = size in pixels.
  */
 void hd63484_fill_rect(int16_t x, int16_t y,
-                        int16_t w, int16_t h,
-                        uint8_t color)
+                       int16_t w, int16_t h,
+                       uint8_t color)
 {
     hd63484_set_color0(0x0);
     hd63484_set_color1(color);
     hd63484_set_solid_pattern();
-    hd63484_amove(x, y + h - 1);               /* screen bottom-left of rect */
+    hd63484_amove(x, y + h - 1);                                      /* screen bottom-left of rect */
     hd63484_afrct(x + w - 1, y, AREA_NONE, COL_REG_IND, OPM_REPLACE); /* top-right */
 }
 
@@ -841,8 +843,8 @@ void hd63484_fill_rect(int16_t x, int16_t y,
  * hd63484_draw_line – draw a line between two screen-space points.
  */
 void hd63484_draw_line(int16_t x0, int16_t y0,
-                        int16_t x1, int16_t y1,
-                        uint8_t color)
+                       int16_t x1, int16_t y1,
+                       uint8_t color)
 {
     hd63484_set_color0(0x0);
     hd63484_set_color1(color);
@@ -862,11 +864,12 @@ void hd63484_set_font(const uint8_t (*font)[8])
     hd63484_font = font;
 }
 
-unsigned char reverse(unsigned char b) {
-   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-   b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-   b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-   return b;
+unsigned char reverse(unsigned char b)
+{
+    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+    return b;
 }
 
 /*
@@ -883,14 +886,16 @@ unsigned char reverse(unsigned char b) {
  * when loading the pattern RAM so the glyph appears upright on screen.
  */
 void hd63484_draw_char(int16_t sx, int16_t sy, char c,
-                        uint8_t fg, uint8_t bg)
+                       uint8_t fg, uint8_t bg)
 {
     uint16_t pram[16];
-    uint8_t  row;
+    uint8_t row;
     const uint8_t *glyph;
 
-    if (!hd63484_font) return;
-    if ((uint8_t)c >= 128) c = '?';
+    if (!hd63484_font)
+        return;
+    if ((uint8_t)c >= 128)
+        c = '?';
 
     glyph = hd63484_font[(uint8_t)c];
 
@@ -924,13 +929,48 @@ void hd63484_draw_char(int16_t sx, int16_t sy, char c,
  * next character would start beyond the right edge of the screen.
  */
 void hd63484_draw_string(int16_t sx, int16_t sy, const char *str,
-                          uint8_t fg, uint8_t bg)
+                         uint8_t fg, uint8_t bg)
 {
-    while (*str) {
+    while (*str)
+    {
         hd63484_draw_char(sx, sy, *str, fg, bg);
         sx += 8;
         str++;
     }
+}
+
+uint8_t stringfg = PAL_WHITE;
+uint8_t stringbg = PAL_BLACK;
+uint8_t stringx = 8;
+uint8_t stringy = 8;
+
+void print_string(const char *str)
+{
+    while (*str) {
+        bool advance_y = false;
+        if (*str == '\n') {
+            stringx = 8; 
+            advance_y = true;
+        } else if (*str == '\r') {
+            stringx = 8;
+        } else {
+            hd63484_draw_char(stringx, stringy, *str, stringfg, stringbg);
+            if ((stringx += 8) >= 320) { stringx = 8; advance_y = true; }
+        }
+
+        if (advance_y) {
+            advance_y = false;
+            if ((stringy += 8) >= 240) stringy = 8;
+        }
+
+        str++;
+    }
+}
+
+void println(const char *str)
+{
+    print_string(str);
+    print_string("\n");
 }
 
 void ramdac_reset(void)

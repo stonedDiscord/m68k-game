@@ -319,6 +319,56 @@ extern volatile uint16_t *hd63484_control;  /* RS=1 : data / FIFO        */
 /* CRCL clockwise flag (bit 8) */
 #define CRCL_CW     (1u << 8)
 
+/* ---- 4bpp IRGB palette indices ---- */
+#define PAL_BLACK    0x0u
+#define PAL_RED      0x1u
+#define PAL_GREEN    0x2u
+#define PAL_YELLOW   0x3u
+#define PAL_BLUE     0x4u
+#define PAL_MAGENTA  0x5u
+#define PAL_CYAN     0x6u
+#define PAL_WHITE    0x7u
+#define PAL_GRAY     0x8u
+#define PAL_BRED     0x9u
+#define PAL_BGREEN   0xAu
+#define PAL_BYELLOW  0xBu
+#define PAL_BBLUE    0xCu
+#define PAL_BMAGENTA 0xDu
+#define PAL_BCYAN    0xEu
+#define PAL_BWHITE   0xFu
+
+/* ---- Screen geometry ---- */
+#define SCREEN_W    384
+#define SCREEN_H    280
+
+/*
+ * Horizontal timing (memory cycles):
+ *   HC  = total cycles - 1 = 383  (384 total = SCREEN_W)
+ *   HSW = 2  (minimum valid sync width)
+ *   HDS = 0  (display starts 1 cycle after HSYNC rise, encoded as HS-1=0)
+ *   HDW = 95 (display width: (95+1)*4px = 384px = SCREEN_W)
+ *
+ * Vertical timing (rasters):
+ *   VC  = 280  (total rasters = SCREEN_H, stored directly not -1)
+ *   VSW = 2    (sync width)
+ *   VDS = 0    (display starts at raster 1, encoded as VS-1=0)
+ *   SP1 = 280  (Base screen height = full SCREEN_H rasters)
+ *
+ * Memory width = SCREEN_W / 4 px_per_word = 96 words per line
+ */
+#define HTOTAL         384
+#define HSYNC_W          2
+#define HDISP_S          0
+#define HDISP_W         95
+
+#define VTOTAL         280
+#define VSYNC_W          2
+#define VDISP_S          0
+#define SCREEN_RASTERS 280
+
+#define MEM_WIDTH       96
+#define VRAM_BASE   0x00000UL
+
 /* ---------------------------------------------------------------------------
  * Initialization config structure
  *
@@ -414,12 +464,6 @@ void     hd63484_set_origin(uint8_t dn, uint32_t addr, uint8_t dot);
 
 /* ---------------------------------------------------------------------------
  * Coordinate system
- *
- * MAME's HD63484 emulation uses Y-UP addressing: calc_offset() computes
- *   physical_word = org_addr  +  x / pixels_per_word  -  y * MWR
- * so Y increases UPWARD.  hd63484_init() places the ORG address at the
- * bottom-left of the framebuffer so that y=0 maps to the bottom screen row
- * and y=(H-1) maps to the top row.
  *
  * All drawing API functions in this library accept Y in screen-space
  * (y=0 = TOP of screen, y increases downward) and flip internally.

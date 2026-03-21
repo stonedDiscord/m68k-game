@@ -35,56 +35,6 @@
 extern unsigned char pt3player_main_track_pt3[];
 extern unsigned int pt3player_main_track_pt3_len;
 
-/* ---- Screen geometry ---- */
-#define SCREEN_W    384
-#define SCREEN_H    280
-
-/*
- * Horizontal timing (memory cycles):
- *   HC  = total cycles - 1 = 383  (384 total = SCREEN_W)
- *   HSW = 2  (minimum valid sync width)
- *   HDS = 0  (display starts 1 cycle after HSYNC rise, encoded as HS-1=0)
- *   HDW = 95 (display width: (95+1)*4px = 384px = SCREEN_W)
- *
- * Vertical timing (rasters):
- *   VC  = 280  (total rasters = SCREEN_H, stored directly not -1)
- *   VSW = 2    (sync width)
- *   VDS = 0    (display starts at raster 1, encoded as VS-1=0)
- *   SP1 = 280  (Base screen height = full SCREEN_H rasters)
- *
- * Memory width = SCREEN_W / 4 px_per_word = 96 words per line
- */
-#define HTOTAL         384
-#define HSYNC_W          2
-#define HDISP_S          0
-#define HDISP_W         95
-
-#define VTOTAL         280
-#define VSYNC_W          2
-#define VDISP_S          0
-#define SCREEN_RASTERS 280
-
-#define MEM_WIDTH       96
-#define VRAM_BASE   0x00000UL
-
-/* ---- 4bpp IRGB palette indices ---- */
-#define PAL_BLACK    0x0u
-#define PAL_RED      0x1u
-#define PAL_GREEN    0x2u
-#define PAL_YELLOW   0x3u
-#define PAL_BLUE     0x4u
-#define PAL_MAGENTA  0x5u
-#define PAL_CYAN     0x6u
-#define PAL_WHITE    0x7u
-#define PAL_GRAY     0x8u
-#define PAL_BRED     0x9u
-#define PAL_BGREEN   0xAu
-#define PAL_BYELLOW  0xBu
-#define PAL_BBLUE    0xCu
-#define PAL_BMAGENTA 0xDu
-#define PAL_BCYAN    0xEu
-#define PAL_BWHITE   0xFu
-
 #define BTN_UP      (1u << 1)
 #define BTN_RIGHT   (1u << 4)
 #define BTN_DOWN    (1u << 7)
@@ -167,8 +117,10 @@ int main(void)
     hd63484_draw_line(0, SCREEN_H - 1, SCREEN_W - 1, 0, PAL_MAGENTA);
 
     /* Text on a coloured background */
-    hd63484_draw_string(8, 8, "Testprogramm fur STELLA Gerate.", PAL_WHITE, PAL_BLUE);
-    hd63484_draw_string(8, 16, "Und andere Banditen", PAL_WHITE, PAL_BLUE);
+    println("Testprogramm fur STELLA Gerate.");
+    println("Und andere Banditen");
+    println("Test1");
+    println("Test2");
 
     setup_duart();
 
