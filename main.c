@@ -172,6 +172,8 @@ int main(void)
 
     setup_duart();
 
+    printf("Hello, world!\n");
+
     /* Initialize PT3 player */
     func_setup_music(pt3player_main_track_pt3, pt3player_main_track_pt3_len, 0, 0);
 
