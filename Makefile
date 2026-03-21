@@ -115,6 +115,14 @@ funlddlx: split
 	7z a funlddlx.zip fldl_f6_1.bin fldl_f6_2.bin
 	rm fldl_f6_1.bin fldl_f6_2.bin
 
+moneyf1: split
+	cp rom.1.u2.bin m27c1001_money_f1_ic1
+	cp rom.2.u6.bin m27c1001_money_f1_ic2
+	truncate --size=128K m27c1001_money_f1_ic1
+	truncate --size=128K m27c1001_money_f1_ic2
+	7z a moneyf1.zip m27c1001_money_f1_ic1 m27c1001_money_f1_ic2
+	rm m27c1001_money_f1_ic1 m27c1001_money_f1_ic2
+
 skattva: split
 	cp rom.1.u2.bin skat_tv_version_ts3.1.u2.bin
 	cp rom.2.u6.bin skat_tv_version_ts3.2.u6.bin
@@ -144,6 +152,11 @@ test: skattv
 	cp skattv.zip /run/media/stoned/schrott/Roms/mame/roms/
 	cd /run/media/stoned/schrott/msys64/src/mame/
 	/run/media/stoned/schrott/msys64/src/mame/mame skattv -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window
+
+testn: moneyf1
+	cp moneyf1.zip /run/media/stoned/schrott/Roms/mame/roms/
+	cd /run/media/stoned/schrott/msys64/src/mame/
+	/run/media/stoned/schrott/msys64/src/mame/mame moneyf1 -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window -debug
 
 dump:
 	$(OBJDUMP) -mm68k:$(CPU) -belf32-m68k -st -j.evt bmbinary
