@@ -1,4 +1,7 @@
 #include "duart.h"
+#include <stdbool.h>
+
+bool swapper = true;
 
 /* =========================================================================
  * ISR – placed at the vector address by the linker script (platform.ld).
@@ -46,6 +49,14 @@ duartInterrupt(void)
         (void)dummy;
 
         /* Put your periodic tick handler here */
+        if (swapper) {
+            OPR_SET = 0x20;     /* Assert OP5 (LED1 on) */
+            OPR_CLR = 0x40;     /* Deassert OP6 (LED2 off) */
+        } else {
+            OPR_SET = 0x40;     /* Assert OP6 (LED2 on) */
+            OPR_CLR = 0x20;     /* Deassert OP5 (LED1 off) */
+        }
+        swapper = !swapper;
     }
 
     /* ---- Input port change ---- */
