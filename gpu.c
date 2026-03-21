@@ -107,7 +107,7 @@ void hd63484_wait_ced(void)
  */
 void hd63484_fifo_write(uint16_t word)
 {
-    hd63484_wait_wfr();
+    //hd63484_wait_wfr();
     *hd63484_control = word;
 }
 
@@ -123,7 +123,7 @@ uint16_t hd63484_fifo_read(void)
 /* Internal helper: select FIFO entry and write a word */
 static inline void fifo_w(uint16_t word)
 {
-    hd63484_wait_wfr();
+    //hd63484_wait_wfr();
     *hd63484_control = word;
 }
 
@@ -155,8 +155,7 @@ void hd63484_reset(void)
     *hd63484_control = CCR_ABT;
 
     /* Wait until WFE is set — FIFOs are confirmed empty */
-    while (!(hd63484_read_sr() & SR_WFE))
-        ;
+    //hd63484_wait_wfe();
 
     /* Clear ABT so commands can flow; all interrupt enables off */
     hd63484_write_ar(REG_CCR);
@@ -172,8 +171,7 @@ void hd63484_abort(void)
 {
     hd63484_write_reg(REG_CCR, CCR_ABT);
     /* Wait until WFE set (FIFOs cleared) */
-    while (!(hd63484_read_sr() & SR_WFE))
-        ;
+    //hd63484_wait_wfe();
 }
 
 /*
