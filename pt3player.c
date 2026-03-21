@@ -459,7 +459,10 @@ static void ChangeRegisters(PT3_Channel_Parameters *Chan, int ch) {
 		if (Chan->Position_In_Sample >= Chan->Sample_Length) Chan->Position_In_Sample = Chan->Loop_Sample_Position;
 		Chan->Position_In_Ornament++;
 		if (Chan->Position_In_Ornament >= Chan->Ornament_Length) Chan->Position_In_Ornament = Chan->Loop_Ornament_Position;
-	} else Chan->Amplitude = 0;
+	} else {
+    	Chan->Amplitude = 0;
+    	TempMixer |= 0x48;  // disable both tone and noise for this channel's position
+	}
 
 	TempMixer >>= 1;
 	if (Chan->Current_OnOff > 0) {
