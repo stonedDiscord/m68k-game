@@ -1,71 +1,6 @@
 #include "duart.h"
 #include <stdbool.h>
 
-bool swapper = true;
-
-/* =========================================================================
- * ISR – placed at the vector address by the linker script (platform.ld).
- *
- * The ISR reads ISR to find which source fired, then handles each one.
- * Reading STOP_CNTR clears the counter/timer interrupt (ISR[3]).
- * Reading RBRA/RBRB clears the receiver-ready interrupt for that channel.
- * ========================================================================= */
-void __attribute__((interrupt))
-duartInterrupt(void)
-{
-    volatile char status = ISR;   /* Snapshot – reading ISR has no side effect */
-
-    /* ---- Channel A receiver ready ---- */
-    if (status & ISR_RxRDYA) {
-        volatile char c = RBRA;   /* Reading the buffer clears RxRDYA in ISR  */
-        (void)c;                  /* Replace with your receive handler         */
-    }
-
-    /* ---- Channel B receiver ready ---- */
-    if (status & ISR_RxRDYB) {
-        volatile char c = RBRB;
-        (void)c;
-    }
-
-    /* ---- Channel A transmitter ready ---- */
-    if (status & ISR_TxRDYA) {
-        /*
-         * The transmit-ready interrupt stays active as long as TBRA is empty.
-         * Disable the interrupt here, or load the next character into TBRA.
-         * Loading a character clears TxRDYA until the shift register accepts
-         * it and the holding register becomes empty again.
-         */
-    }
-
-    /* ---- Counter / timer ready ---- */
-    if (status & ISR_CTRDY) {
-        /*
-         * In timer mode ISR[3] is set every second countdown cycle.
-         * Reading STOP_CNTR clears ISR[3] but does NOT stop the timer.
-         * In counter mode, reading STOP_CNTR clears ISR[3] AND stops
-         * the counter.
-         */
-        volatile char dummy = STOP_CNTR;   /* Clear the C/T interrupt */
-        (void)dummy;
-
-        /* Put your periodic tick handler here */
-        if (swapper) {
-            OPR_SET = 0x20;     /* Assert OP5 (LED1 on) */
-            OPR_CLR = 0x40;     /* Deassert OP6 (LED2 off) */
-        } else {
-            OPR_SET = 0x40;     /* Assert OP6 (LED2 on) */
-            OPR_CLR = 0x20;     /* Deassert OP5 (LED1 off) */
-        }
-        swapper = !swapper;
-    }
-
-    /* ---- Input port change ---- */
-    if (status & ISR_IPCNG) {
-        volatile char ipcr = IPCR;   /* Reading IPCR clears ISR[7] */
-        (void)ipcr;
-    }
-}
-
 /* =========================================================================
  * setup_duart
  *
@@ -92,10 +27,9 @@ void setup_duart(void)
 
     /* -----------------------------------------------------------------
      * Interrupt vector – will be placed on the bus during IACK cycles.
-     * 0x40 maps to MC68000 autovector level / user vector; adjust to
-     * match your platform's interrupt table.
+     * 0x41 maps to duartInterrupt in platform.ld
      * ----------------------------------------------------------------- */
-    IVR = 0x40;
+    IVR = 0x41;
 
     /* -----------------------------------------------------------------
      * Auxiliary Control Register
@@ -118,7 +52,7 @@ void setup_duart(void)
      * square-wave cycle), so the actual interrupt period is:
      *   2 * preload / clock = 10 ms  (as calculated above)
      * ----------------------------------------------------------------- */
-    ct_set_timer(CT_PRELOAD_MS(10));    /* 10 ms periodic interrupt */
+    ct_set_timer(CT_PRELOAD_MS(20));    /* 10 ms periodic interrupt */
 
     /* Start the timer BEFORE enabling channel clocks (datasheet recommendation) */
     ct_start();

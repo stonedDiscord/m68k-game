@@ -41,11 +41,87 @@ extern unsigned int pt3player_main_track_pt3_len;
 #define BTN_LEFT    (1u << 10)
 
 #include <stdio.h>
+#include <stdbool.h>
 
-// ISR - see platform.ld
+/* =========================================================================
+ * ISR – placed at the vector address by the linker script (platform.ld).
+ *
+ * The ISR reads ISR to find which source fired, then handles each one.
+ * Reading STOP_CNTR clears the counter/timer interrupt (ISR[3]).
+ * Reading RBRA/RBRB clears the receiver-ready interrupt for that channel.
+ * ========================================================================= */
+bool swapper = true;
+static uint32_t timer_ticks = 0;
+
+ void __attribute__((interrupt))
+duartInterrupt(void)
+{
+    volatile char status = ISR;   /* Snapshot – reading ISR has no side effect */
+
+    /* ---- Channel A receiver ready ---- */
+    if (status & ISR_RxRDYA) {
+        volatile char c = RBRA;   /* Reading the buffer clears RxRDYA in ISR  */
+        (void)c;                  /* Replace with your receive handler         */
+    }
+
+    /* ---- Channel B receiver ready ---- */
+    if (status & ISR_RxRDYB) {
+        volatile char c = RBRB;
+        (void)c;
+    }
+
+    /* ---- Channel A transmitter ready ---- */
+    if (status & ISR_TxRDYA) {
+        /*
+         * The transmit-ready interrupt stays active as long as TBRA is empty.
+         * Disable the interrupt here, or load the next character into TBRA.
+         * Loading a character clears TxRDYA until the shift register accepts
+         * it and the holding register becomes empty again.
+         */
+    }
+
+    /* ---- Counter / timer ready ---- */
+    if (status & ISR_CTRDY) {
+        /*
+         * In timer mode ISR[3] is set every second countdown cycle.
+         * Reading STOP_CNTR clears ISR[3] but does NOT stop the timer.
+         * In counter mode, reading STOP_CNTR clears ISR[3] AND stops
+         * the counter.
+         */
+        volatile char dummy = STOP_CNTR;   /* Clear the C/T interrupt */
+        (void)dummy;
+
+        /* Put your periodic tick handler here */
+        func_play_tick(0);
+        audio_update_pt3();
+        timer_ticks++;
+        if (timer_ticks >= 50) {            /* 50 * 10 ms = 500 ms */
+            timer_ticks = 0;
+            OPR_CLR = 0x60;                 /* Deassert both OP5 and OP6 (both LEDs off) */
+            if (swapper) {
+                OPR_SET = 0x20;             /* Assert OP5 (LED1 on) */
+            } else {
+                OPR_SET = 0x40;             /* Assert OP6 (LED2 on) */
+            }
+            swapper = !swapper;
+        }
+    }
+
+    /* ---- Input port change ---- */
+    if (status & ISR_IPCNG) {
+        volatile char ipcr = IPCR;   /* Reading IPCR clears ISR[7] */
+        (void)ipcr;
+    }
+}
+
 void __attribute__((interrupt))
 vector64(void) {
 	;
+}
+
+static inline void enable_interrupts(void)
+{
+    __asm__ volatile ("move.w #0x2000, %%sr" : : : "memory");
 }
 
 void display_inputs()
@@ -123,37 +199,29 @@ int main(void)
     println("Test2");
 
     setup_duart();
+    enable_interrupts();
 
     printf("Hello, world!\n");
 
     /* Initialize PT3 player */
     func_setup_music(pt3player_main_track_pt3, pt3player_main_track_pt3_len, 0, 0);
 
-    char recv;
-
     uint16_t counter = 0;
 
     do {
-        func_play_tick(0);
-        audio_update_pt3();
+        char lnr[15];
+        sprintf(lnr, "Nummer %d. ", counter);
 
-        recv = getchar_();
-        if (recv != 0)
-        {
-            // putchar_(recv); // Echo back the received character
-            char ser_str[5];
-            sprintf(ser_str, "%04X", read_iob());
-            hd63484_draw_string(200, 180, ser_str, PAL_YELLOW, PAL_BLACK);
-        }
+        print_string(lnr);
         counter++;
         if (counter % 10 == 0)
         {
             display_inputs();
         }
-        if (counter == 30000)
+        if (counter >= 30000)
         {
             // Change the text color after 30000 iterations
-            hd63484_draw_string(8, 8, "Es wurde ein Problem festgestellt.", PAL_YELLOW, PAL_BLUE);
+            hd63484_draw_string(8, 8, "Das waren 30000 Umdrehungen.", PAL_YELLOW, PAL_BLUE);
             counter = 0;
         }
     } while (counter < 60000);
