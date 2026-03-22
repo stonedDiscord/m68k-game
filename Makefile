@@ -144,11 +144,13 @@ skattv: split
 	rm f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
 
 burn: split
-	truncate --size=512K rom.1.u2.bin
-	minipro -p W27E040 -w rom.1.u2.bin
+	truncate --size=64K rom.1.u2.bin
+	cat rom.1.u2.bin rom.1.u2.bin rom.1.u2.bin rom.1.u2.bin rom.1.u2.bin rom.1.u2.bin rom.1.u2.bin rom.1.u2.bin > rom.1.expanded.u2.bin
+	minipro -p W27E040 -w rom.1.expanded.u2.bin
 	read -n1 -r -p "Swap the ROM and press any key..." key
-	truncate --size=512K rom.2.u6.bin
-	minipro -p W27E040 -w rom.2.u6.bin
+	truncate --size=64K rom.2.u6.bin
+	cat rom.2.u6.bin rom.2.u6.bin rom.2.u6.bin rom.2.u6.bin rom.2.u6.bin rom.2.u6.bin rom.2.u6.bin rom.2.u6.bin > rom.2.expanded.u6.bin
+	minipro -p W27E040 -w rom.2.expanded.u6.bin
 
 testr: funlddlx
 	cp funlddlx.zip /run/media/stoned/schrott/Roms/mame/roms/
