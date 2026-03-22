@@ -940,9 +940,9 @@ void hd63484_draw_string(int16_t sx, int16_t sy, const char *str,
 }
 
 uint8_t stringfg = PAL_WHITE;
-uint8_t stringbg = PAL_BLACK;
-uint8_t stringx = 8;
-uint8_t stringy = 8;
+uint8_t stringbg = PAL_GREEN;
+uint16_t stringx = 8;
+uint16_t stringy = 8;
 
 void print_string(const char *str)
 {
@@ -955,12 +955,13 @@ void print_string(const char *str)
             stringx = 8;
         } else {
             hd63484_draw_char(stringx, stringy, *str, stringfg, stringbg);
-            if ((stringx += 8) >= 320) { stringx = 8; advance_y = true; }
+            if ((stringx += 8) >= HTOTAL-8) { stringx = 8; advance_y = true; }
         }
 
         if (advance_y) {
             advance_y = false;
-            if ((stringy += 8) >= 240) stringy = 8;
+            stringy = stringy + 8;
+            if (stringy >= VTOTAL-8) stringy = 8;
         }
 
         str++;
