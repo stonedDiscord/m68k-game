@@ -210,7 +210,7 @@ int main(void)
 
     do {
         char lnr[15];
-        sprintf(lnr, "Nummer %d. ", counter);
+        sprintf(lnr, "Popcorn %d. ", counter);
 
         print_string(lnr);
         counter++;

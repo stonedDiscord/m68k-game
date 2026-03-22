@@ -102,7 +102,8 @@ _start:
         .weak __DefaultInterrupt
         .globl __DefaultInterrupt
 __DefaultInterrupt:
-        stop    #0x2700
-        bra     .
+        nop
+        rte
+        rts
 
         .end
