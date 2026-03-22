@@ -143,6 +143,13 @@ skattv: split
 	7z a skattv.zip f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
 	rm f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
 
+burn: split
+	truncate --size=512K rom.1.u2.bin
+	minipro -p W27E040 -w rom.1.u2.bin
+	read -n1 -r -p "Swap the ROM and press any key..." key
+	truncate --size=512K rom.2.u6.bin
+	minipro -p W27E040 -w rom.2.u6.bin
+
 testr: funlddlx
 	cp funlddlx.zip /run/media/stoned/schrott/Roms/mame/roms/
 	cd /run/media/stoned/schrott/msys64/src/mame/
