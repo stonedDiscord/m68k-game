@@ -35,11 +35,6 @@
 extern unsigned char pt3player_main_track_pt3[];
 extern unsigned int pt3player_main_track_pt3_len;
 
-#define BTN_UP (1u << 1)
-#define BTN_RIGHT (1u << 4)
-#define BTN_DOWN (1u << 7)
-#define BTN_LEFT (1u << 10)
-
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -142,7 +137,7 @@ static inline void enable_interrupts(void)
 	__asm__ volatile("move.w #0x2000, %%sr" : : : "memory");
 }
 
-void display_inputs()
+void display_all_inputs()
 {
 	scan_inputs();
 
@@ -161,6 +156,11 @@ void display_inputs()
 	hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
 	sprintf(hex_str, "%04X", read_iob());
 	hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
+}
+
+void dump_input(uint8_t n) {
+	uint16_t input_state = read_input(n);
+	printf("Input %d: 0x%04X", n, input_state);
 }
 
 int main(void)
@@ -230,12 +230,28 @@ int main(void)
 	{
 		char lnr[15];
 		sprintf(lnr, "Popcorn %d. ", counter);
-
 		print_string(lnr);
+
+		switch (rec_a_buffer)
+		{
+		case '0':
+			dump_input(0);
+			break;
+		case '1':
+			dump_input(1);
+			break;
+		case '2':
+			dump_input(2);
+			break;
+		default:
+			break;
+		}
+
+
 		counter++;
 		if (counter % 10 == 0)
 		{
-			display_inputs();
+			display_all_inputs();
 		}
 		if (counter >= 30000)
 		{
