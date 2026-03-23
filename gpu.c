@@ -694,7 +694,7 @@ void hd63484_paint(int stop_at_edge,
      * CL0 is set to 0xFFFF here so it never matches any valid 4bpp pixel,
      * disabling the secondary boundary. If CL0 were left at 0 (black) it would
      * stop the fill immediately when scanning the black background. */
-    hd63484_set_color0(0xFFFFu);
+    hd63484_set_color0(0xFF);
 
     /* Bit 8 of PAINT opcode: E=0 stops at EDG color, E=1 stops at non-EDG */
     uint16_t op = CMD_PAINT | draw_flags(area, col, opm);

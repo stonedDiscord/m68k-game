@@ -58,6 +58,7 @@ struct timespec rtc_get_timespec(void)
     y10  = RTC_READ(RTC_REG_Y10);
     y1   = RTC_READ(RTC_REG_Y1);
     w    = RTC_READ(RTC_REG_W);
+    (void)w;  /* day of week not currently used */
  
     RTC_HOLD_CLR();
  

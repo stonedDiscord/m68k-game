@@ -399,7 +399,7 @@ typedef struct {
     uint16_t dcr;        /* full DCR word (use DCR_* + SE_* macros) */
 
     /* Horizontal timing (HSR r82) */
-    uint8_t  hc;         /* horizontal cycle  (H-1, 0–255)         */
+    uint16_t hc;        /* horizontal cycle  (H-1, 0–4095)       */
     uint8_t  hsw;        /* horizontal sync width (2–31)           */
 
     /* Horizontal display (HDR r84) */
@@ -604,6 +604,9 @@ void hd63484_draw_char  (int16_t sx, int16_t sy, char c,
                           uint8_t fg, uint8_t bg);
 void hd63484_draw_string(int16_t sx, int16_t sy, const char *str,
                           uint8_t fg, uint8_t bg);
+
+void print_string(const char *str);
+void println(const char *str);
 
 void ramdac_reset(void);
 
