@@ -232,20 +232,13 @@ int main(void)
 		sprintf(lnr, "Popcorn %d. ", counter);
 		print_string(lnr);
 
-		switch (rec_a_buffer)
+		if (rec_a_buffer >= '0' && rec_a_buffer <= '7')
 		{
-		case '0':
-			dump_input(0);
-			break;
-		case '1':
-			dump_input(1);
-			break;
-		case '2':
-			dump_input(2);
-			break;
-		default:
-			break;
-		}
+			dump_input(rec_a_buffer - '0');
+		} else if (rec_a_buffer != 0)
+		{
+			print_string(rec_a_buffer);
+		}		
 		rec_a_buffer = 0x00;
 
 		counter++;
