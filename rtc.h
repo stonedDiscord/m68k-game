@@ -95,6 +95,9 @@ static volatile uint8_t * const rtc_address = (volatile uint8_t *)RTC_BASE;
 #define RTC_HOLD_CLR()   RTC_WRITE(RTC_REG_CD, RTC_READ(RTC_REG_CD) & ~RTC_CD_HOLD)
 #define RTC_IS_BUSY()    (RTC_READ(RTC_REG_CD) & RTC_CD_BUSY)
 
+/* Read RTC and return POSIX timespec */
+struct timespec rtc_get_timespec(void);
+
 /* ---------------------------------------------------------------------------
  * Timing constraints (from datasheet, VDD=5V, Ta=-40..+85°C)
  *

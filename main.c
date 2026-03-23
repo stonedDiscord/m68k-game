@@ -28,6 +28,7 @@
 #include "gpu.h"
 #include "font.h" /* font8x8[128][8] */
 #include "pt3player.h"
+#include "rtc.h"
 
 #include "io.h"
 
@@ -37,6 +38,7 @@ extern unsigned int pt3player_main_track_pt3_len;
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 
 char rec_a_buffer = 0;
 char rec_b_buffer = 0;
@@ -239,6 +241,17 @@ int main(void)
 		case 'h':
 			printf("Hallo!\n");
 			break;
+
+		case 'T':
+		case 't':
+		{
+			/* Use rtc_get_timespec from rtc.c */
+			struct timespec ts = rtc_get_timespec();
+			struct tm *tm = localtime(&ts.tv_sec);
+			printf("Datum: %02d.%02d.%04d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year + 1900);
+			printf("Uhrzeit: %02d:%02d:%02d\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
+			break;
+		}
 
 		default:
 			if (rec_a_buffer >= '0' && rec_a_buffer <= '7')
