@@ -292,7 +292,8 @@ int main(void)
 			}
 			else if (rec_a_buffer != 0)
 			{
-				print_string(rec_a_buffer);
+				char buf[2] = { rec_a_buffer, '\0' };
+				print_string(buf);
 			}
 			break;
 		}
