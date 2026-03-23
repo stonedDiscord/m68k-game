@@ -232,13 +232,26 @@ int main(void)
 		sprintf(lnr, "Popcorn %d. ", counter);
 		print_string(lnr);
 
-		if (rec_a_buffer >= '0' && rec_a_buffer <= '7')
+
+		switch (rec_a_buffer)
 		{
-			dump_input(rec_a_buffer - '0');
-		} else if (rec_a_buffer != 0)
-		{
-			print_string(rec_a_buffer);
-		}		
+		case 'H':
+		case 'h':
+			printf("Hallo!\n");
+			break;
+
+		default:
+			if (rec_a_buffer >= '0' && rec_a_buffer <= '7')
+			{
+				dump_input(rec_a_buffer - '0');
+			}
+			else if (rec_a_buffer != 0)
+			{
+				print_string(rec_a_buffer);
+			}
+			break;
+		}
+
 		rec_a_buffer = 0x00;
 
 		counter++;
