@@ -4,15 +4,6 @@
 #include <stdint.h>
 #include <time.h>
 
-/* Minimal definition of timespec for bare-metal use (no mktime dependency) */
-typedef unsigned long time_t;
-
-struct timespec
-{
-	time_t tv_sec;
-	long tv_nsec;
-};
-
 /* ---------------------------------------------------------------------------
  * Epson RTC-62421 / RTC-62423  –  memory-mapped register header
  *
