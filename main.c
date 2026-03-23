@@ -242,13 +242,18 @@ int main(void)
 			printf("Hallo!\n");
 			break;
 
-		case 'T':
-		case 't':
-		{
-			/* Use rtc_get_timespec from rtc.c */
+		case 'D':
+		case 'd':
 			struct timespec ts = rtc_get_timespec();
 			struct tm *tm = localtime(&ts.tv_sec);
 			printf("Datum: %02d.%02d.%04d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year + 1900);
+			break;
+
+		case 'T':
+		case 't':
+		{
+			struct timespec ts = rtc_get_timespec();
+			struct tm *tm = localtime(&ts.tv_sec);
 			printf("Uhrzeit: %02d:%02d:%02d\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
 			break;
 		}
