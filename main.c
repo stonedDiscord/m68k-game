@@ -38,7 +38,6 @@ extern unsigned int pt3player_main_track_pt3_len;
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <time.h>
 
 char rec_a_buffer = 0;
 char rec_b_buffer = 0;
@@ -244,17 +243,45 @@ int main(void)
 
 		case 'D':
 		case 'd':
-			struct timespec ts = rtc_get_timespec();
-			struct tm *tm = localtime(&ts.tv_sec);
-			printf("Datum: %02d.%02d.%04d\n", tm->tm_mday, tm->tm_mon + 1, tm->tm_year + 1900);
+		{
+			RTC_HOLD_SET();
+			while (RTC_IS_BUSY());
+			
+			int d10 = RTC_READ(RTC_REG_D10);
+			int d1 = RTC_READ(RTC_REG_D1);
+			int mo10 = RTC_READ(RTC_REG_MO10);
+			int mo1 = RTC_READ(RTC_REG_MO1);
+			int y10 = RTC_READ(RTC_REG_Y10);
+			int y1 = RTC_READ(RTC_REG_Y1);
+			
+			RTC_HOLD_CLR();
+			
+			int day = d10 * 10 + d1;
+			int mon = mo10 * 10 + mo1;
+			int year = 2000 + y10 * 10 + y1;
+			printf("Datum: %02d.%02d.%04d\n", day, mon, year);
 			break;
+		}
 
 		case 'T':
 		case 't':
 		{
-			struct timespec ts = rtc_get_timespec();
-			struct tm *tm = localtime(&ts.tv_sec);
-			printf("Uhrzeit: %02d:%02d:%02d\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
+			RTC_HOLD_SET();
+			while (RTC_IS_BUSY());
+			
+			int s10 = RTC_READ(RTC_REG_S10);
+			int s1 = RTC_READ(RTC_REG_S1);
+			int mi10 = RTC_READ(RTC_REG_MI10);
+			int mi1 = RTC_READ(RTC_REG_MI1);
+			int h10 = RTC_READ(RTC_REG_H10) & 0x3;
+			int h1 = RTC_READ(RTC_REG_H1);
+			
+			RTC_HOLD_CLR();
+			
+			int sec = s10 * 10 + s1;
+			int min = mi10 * 10 + mi1;
+			int hour = h10 * 10 + h1;
+			printf("Uhrzeit: %02d:%02d:%02d\n", hour, min, sec);
 			break;
 		}
 
