@@ -246,7 +246,7 @@ int main(void)
 		default:
 			break;
 		}
-
+		rec_a_buffer = 0x00;
 
 		counter++;
 		if (counter % 10 == 0)
