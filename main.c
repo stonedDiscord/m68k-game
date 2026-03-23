@@ -29,6 +29,7 @@
 #include "font.h" /* font8x8[128][8] */
 #include "pt3player.h"
 #include "rtc.h"
+#include "tk.h"
 
 #include "io.h"
 
@@ -230,12 +231,21 @@ int main(void)
 	do
 	{
 		char lnr[15];
+		stringbg = PAL_GREEN;
 		sprintf(lnr, "Popcorn %d. ", counter);
 		print_string(lnr);
 
 
 		switch (rec_a_buffer)
 		{
+		case 'K':
+		case 'k':
+			struct tm time;
+			tk_read(&time);
+			printf("Datum: %02d.%02d.%04d\n", time.tm_mday, time.tm_mon + 1, time.tm_year + 1900);
+			printf("Uhrzeit: %02d:%02d:%02d\n", time.tm_hour, time.tm_min, time.tm_sec);
+			break;
+
 		case 'H':
 		case 'h':
 			printf("Hallo!\n");
@@ -293,6 +303,7 @@ int main(void)
 			else if (rec_a_buffer != 0)
 			{
 				char buf[2] = { rec_a_buffer, '\0' };
+				stringbg = PAL_BLACK;
 				print_string(buf);
 			}
 			break;

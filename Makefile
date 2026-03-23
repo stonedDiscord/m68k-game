@@ -15,7 +15,7 @@
 #
 #   SRCS=main.c user.c \
 #        driver.s
-SRCS=main.c gpu.c duart.c io.c audio.c pt3player.c music_data.c rtc.c
+SRCS=main.c gpu.c duart.c io.c audio.c pt3player.c rtc.c tk.c music_data.c 
 
 # Specify the CPU type that you are targeting your build towards.
 #
@@ -97,6 +97,9 @@ crt: crt0.S
 clean:
 	rm -rf $(BUILDDIR)/*
 	rm -f bmbinary*
+	rm -f music_data.c
+
+musicc:
 	rm -f music_data.c
 
 rom: bmbinary

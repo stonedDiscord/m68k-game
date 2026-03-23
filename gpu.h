@@ -599,6 +599,12 @@ void     hd63484_draw_line(int16_t x0, int16_t y0,
  * Each character cell is 8×8 pixels.  Characters are clipped if they
  * would extend beyond (SCREEN_W-1, SCREEN_H-1).
  * ---------------------------------------------------------------------------*/
+
+extern uint8_t stringfg;
+extern uint8_t stringbg;
+extern uint16_t stringx;
+extern uint16_t stringy;
+
 void hd63484_set_font(const uint8_t (*font)[8]);
 void hd63484_draw_char  (int16_t sx, int16_t sy, char c,
                           uint8_t fg, uint8_t bg);
