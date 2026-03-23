@@ -8,9 +8,6 @@ Aktuell (Stand März 2026) startet die Software im MAME Emulator für Geräte de
 
 TODO:
 - RAMDAC konfigurieren damit das Bild nicht schwarz bleibt.
-- DUART blockiert, eventuell ist der Sender/Empfänger nicht richtig eingeschaltet.
-- Der Hauptloop ist zu langsam
+- Der Hauptloop ist langsam
 - evtl Schrift im Video-ROM ablegen um hier CPU-Zeit zu gewinnen, idealerweise mit Erkennung ob diese da ist und funktioiniert
-- DUART Timer fehlen komplett
-- DUART Interrupt ist ein Dummy
-- User Interrupt 64 & 65 fehlt einer, vermutlich irgendwas mit Sound
+- User Interrupt 64 & 65 checken ob das so stimmt
