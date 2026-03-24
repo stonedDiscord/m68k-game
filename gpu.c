@@ -976,9 +976,28 @@ void println(const char *str)
 
 void ramdac_reset(void)
 {
-    *ramdac_mask = 0x01;
-    *ramdac_index = 0x02;
-    *ramdac_mask = 0x1e;
-    *ramdac_index = 0x00;
+    volatile uint8_t i;
+    for (i = 0; i < 4; i++)
+        ;
+    for (i = 0; i < 4; i++)
+        ;
+    for (i = 0; i < 4; i++)
+        ;
+
+    *ramdac_index = 0;
+    for (i = 0; i < 4; i++)
+        ;
     *ramdac_mask = 0xff;
+
+    uint16_t j;
+    for (j = 0; j < 16; j++)
+    {
+        uint8_t r = (0x21 * ((j >> 0) & 1) + 0x47 * ((j >> 3) & 1) + 0x97 * ((j >> 0) & 1)) * 63 / 255;
+        uint8_t g = (0x21 * ((j >> 1) & 1) + 0x47 * ((j >> 3) & 1) + 0x97 * ((j >> 1) & 1)) * 63 / 255;
+        uint8_t b = (0x21 * ((j >> 2) & 1) + 0x47 * ((j >> 3) & 1) + 0x97 * ((j >> 2) & 1)) * 63 / 255;
+        *ramdac_index = (uint8_t)j;
+        *ramdac_palette = r;
+        *ramdac_palette = g;
+        *ramdac_palette = b;
+    }
 }
