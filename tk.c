@@ -13,6 +13,12 @@ int tk_read(struct tm *t)
     uint8_t month = TK_MONTH & 0x1Fu;
     uint8_t year  = TK_YEAR;
 
+
+    if (month == 0 || date == 0 || day == 0) /* month, date, and day can't be zero */
+    {
+        return -1; /* invalid BCD value(s) */
+    }
+
     TK_CTRL = 0;                        /* drop R bit, as firmware does */
 
     t->tm_sec  = (int)TK_BCD_TO_BIN(secs);

@@ -255,6 +255,7 @@ int main(void)
 
 	/* Test 2: TK (Time Keeper) */
 	print_string("Test 2 TK: ");
+	printf("Test 2 TK: ");
 	struct tm time;
 	if (tk_read(&time) == 0)
 	{
@@ -286,7 +287,7 @@ int main(void)
 
 	/* Test 3: DUART */
 	print_string("Test 3 DUART: ");
-
+	printf("Test 3 DUART (Hallo das bin ich!): ");
 	if (SRB & TxRDY)
 	{
 		stringbg = PAL_GREEN;
@@ -302,9 +303,28 @@ int main(void)
 	stringbg = PAL_BLACK;
 
 	/* Test 4: Video */
-	print_string("Test 4 Video: ");
-
+	print_string("Test 4 Video (Hallo das bin ich!): ");
+	printf("Test 4 Video: ");
 	if (hd63484_read_sr() & SR_CED)
+	{
+		stringbg = PAL_GREEN;
+		println("OK");
+		printf("OK\n");
+	}
+	else
+	{
+		stringbg = PAL_RED;
+		println("Fehler");
+		printf("Fehler\n");
+	}
+	stringbg = PAL_BLACK;
+
+	/* Test 5: RAM */
+	print_string("Test 5 RAM: ");
+	printf("Test 5 RAM: ");
+	volatile uint16_t *ramtest_addr = (volatile uint16_t *)0xfc0080;
+	*ramtest_addr = 0x1234;
+	if (*ramtest_addr == 0x1234)
 	{
 		stringbg = PAL_GREEN;
 		println("OK");

@@ -36,7 +36,12 @@ int rtc_get_timespec(struct tm *t)
     (void)w;  /* day of week not currently used */
  
     RTC_HOLD_CLR();
- 
+
+    if (d1 == 0 || mo1 == 0) /* day and month can't be zero */
+    {
+        return -1; /* invalid BCD value(s) */
+    }
+
     t->tm_sec  = bcd(s10,  s1);
     t->tm_min  = bcd(mi10, mi1);
     t->tm_hour = bcd(h10,  h1);
