@@ -256,7 +256,33 @@ int main(void)
 		println("Fehler");
 	}
 	stringbg = PAL_BLACK;
+
 	setup_duart();
+
+	/* Test 3: DUART */
+	print_string("Test 3 DUART: ");
+
+	if (SRB & RxRDY && SRB & TxRDY) {
+		stringbg = PAL_GREEN;
+		println("OK");
+	} else {
+		stringbg = PAL_RED;
+		println("Fehler");
+	}
+	stringbg = PAL_BLACK;
+
+	/* Test 4: Video */
+	print_string("Test 4 Video: ");
+
+	if (hd63484_read_sr() & SR_CED) {
+		stringbg = PAL_GREEN;
+		println("OK");
+	} else {
+		stringbg = PAL_RED;
+		println("Fehler");
+	}
+	stringbg = PAL_BLACK;
+
 	enable_interrupts();
 
 	printf("Hello, world!\n");
