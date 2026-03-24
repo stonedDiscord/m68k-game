@@ -10,8 +10,9 @@ jobs:
     - uses: actions/checkout@v6
     - name: Build
       run: |
-        make rom
+        make skattv
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
-        path: bmbinary*
+        name: skattv
+        path: roms/f*.bin

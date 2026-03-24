@@ -11,3 +11,8 @@ TODO:
 - Der Hauptloop ist langsam
 - evtl Schrift im Video-ROM ablegen um hier CPU-Zeit zu gewinnen, idealerweise mit Erkennung ob diese da ist und funktioiniert
 - User Interrupt 64 & 65 checken ob das so stimmt
+
+Bauen:
+```shell
+docker run -v .:/opt/m68k_bare_metal/src/ ghcr.io/stoneddiscord/m68k_bare_metal:master make bmbinary
+```

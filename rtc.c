@@ -9,35 +9,10 @@ static inline int bcd(uint8_t tens, uint8_t units)
     return (int)tens * 10 + (int)units;
 }
 
-/* Days per month (non-leap year) */
-static const uint8_t days_per_month[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
-/* Is leap year? */
-static int is_leap_year(int year)
+int rtc_get_timespec(struct tm *t)
 {
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-}
+    if (!t) return -1;
 
-/* Days since epoch (1970-01-01) */
-static uint32_t days_since_epoch(int year, int month, int day)
-{
-    uint32_t days = 0;
-    for (int y = 1970; y < year; y++)
-    {
-        days += is_leap_year(y) ? 366 : 365;
-    }
-    for (int m = 1; m < month; m++)
-    {
-        days += days_per_month[m - 1];
-        if (m == 2 && is_leap_year(year))
-            days++;
-    }
-    days += day - 1;
-    return days;
-}
-
-struct timespec rtc_get_timespec(void)
-{
     uint8_t h10, h1, mi10, mi1, s10, s1;
     uint8_t y10, y1, mo10, mo1, d10, d1, w;
  
@@ -62,20 +37,16 @@ struct timespec rtc_get_timespec(void)
  
     RTC_HOLD_CLR();
  
-    int sec   = bcd(s10,  s1);
-    int min   = bcd(mi10, mi1);
-    int hour  = bcd(h10,  h1);
-    int day   = bcd(d10,  d1);
-    int month = bcd(mo10, mo1);
-    int year  = 2000 + bcd(y10, y1);
- 
-    /* Calculate Unix timestamp manually */
-    uint32_t days = days_since_epoch(year, month, day);
-    uint32_t secs = days * 86400UL + hour * 3600UL + min * 60UL + sec;
- 
-    struct timespec ts;
-    ts.tv_sec  = (time_t)secs;
-    ts.tv_nsec = 0;
-    return ts;
+    t->tm_sec  = bcd(s10,  s1);
+    t->tm_min  = bcd(mi10, mi1);
+    t->tm_hour = bcd(h10,  h1);
+    t->tm_mday = bcd(d10,  d1);
+    t->tm_mon  = bcd(mo10, mo1) - 1;
+    t->tm_year = 2000 + bcd(y10, y1) - 1900;
+    t->tm_wday = 0;
+    t->tm_yday = 0;
+    t->tm_isdst = -1;
+
+    return 0;
 }
  

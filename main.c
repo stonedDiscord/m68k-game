@@ -160,7 +160,8 @@ void display_all_inputs()
 	hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
 }
 
-void dump_input(uint8_t n) {
+void dump_input(uint8_t n)
+{
 	uint16_t input_state = read_input(n);
 	printf("Input %d: 0x%04X", n, input_state);
 }
@@ -201,7 +202,7 @@ int main(void)
 	hd63484_set_font(font8x8);
 
 	/* 1. Clear to black */
-	hd63484_clear_screen(PAL_GREEN, SCREEN_W, SCREEN_H);
+	hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
 
 	/* 2. White border */
 	hd63484_set_color1(PAL_WHITE);
@@ -212,29 +213,135 @@ int main(void)
 	hd63484_draw_line(0, 0, SCREEN_W - 1, SCREEN_H - 1, PAL_CYAN);
 	hd63484_draw_line(0, SCREEN_H - 1, SCREEN_W - 1, 0, PAL_MAGENTA);
 
-	/* Text on a coloured background */
-	println("Testprogramm fur STELLA Gerate.");
-	println("Und andere Banditen");
-	println("Test1");
-	println("Test2");
-
 	setup_duart();
-	enable_interrupts();
 
-	printf("Hello, world!\n");
+	/* Text on a coloured background */
+	stringbg = PAL_BLACK;
+	println("Testprogramm:");
+	printf("Testprogramm\n\n");
+	println(" ");
+
+	/* Test 1: RTC */
+	print_string("Test 1 RTC: ");
+	printf("Test 1 RTC: ");
+	struct tm time_rtc;
+	if (rtc_get_timespec(&time_rtc) == 0)
+	{
+		stringbg = PAL_GREEN;
+		char datum[32];
+		sprintf(datum, "%04d-%02d-%02d %02d:%02d:%02d",
+				time_rtc.tm_year + 1900,
+				time_rtc.tm_mon + 1,
+				time_rtc.tm_mday,
+				time_rtc.tm_hour,
+				time_rtc.tm_min,
+				time_rtc.tm_sec);
+		println(datum);
+		printf("OK, Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
+			   time_rtc.tm_year + 1900,
+			   time_rtc.tm_mon + 1,
+			   time_rtc.tm_mday,
+			   time_rtc.tm_hour,
+			   time_rtc.tm_min,
+			   time_rtc.tm_sec);
+	}
+	else
+	{
+		stringbg = PAL_RED;
+		println("Fehler");
+		printf("Fehler\n");
+	}
+	stringbg = PAL_BLACK;
+
+	/* Test 2: TK (Time Keeper) */
+	print_string("Test 2 TK: ");
+	struct tm time;
+	if (tk_read(&time) == 0)
+	{
+		stringbg = PAL_GREEN;
+		char datum[32];
+		sprintf(datum, "%04d-%02d-%02d %02d:%02d:%02d",
+				time.tm_year + 1900,
+				time.tm_mon + 1,
+				time.tm_mday,
+				time.tm_hour,
+				time.tm_min,
+				time.tm_sec);
+		println(datum);
+		printf("OK, Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
+			   time.tm_year + 1900,
+			   time.tm_mon + 1,
+			   time.tm_mday,
+			   time.tm_hour,
+			   time.tm_min,
+			   time.tm_sec);
+	}
+	else
+	{
+		stringbg = PAL_RED;
+		println("Fehler");
+		printf("Fehler\n");
+	}
+	stringbg = PAL_BLACK;
+
+	/* Test 3: DUART */
+	print_string("Test 3 DUART: ");
+
+	if (SRB & TxRDY)
+	{
+		stringbg = PAL_GREEN;
+		println("OK");
+		printf("OK\n");
+	}
+	else
+	{
+		stringbg = PAL_RED;
+		println("Fehler");
+		printf("Fehler\n");
+	}
+	stringbg = PAL_BLACK;
+
+	/* Test 4: Video */
+	print_string("Test 4 Video: ");
+
+	if (hd63484_read_sr() & SR_CED)
+	{
+		stringbg = PAL_GREEN;
+		println("OK");
+		printf("OK\n");
+	}
+	else
+	{
+		stringbg = PAL_RED;
+		println("Fehler");
+		printf("Fehler\n");
+	}
+	stringbg = PAL_BLACK;
+
+	enable_interrupts();
 
 	/* Initialize PT3 player */
 	func_setup_music(pt3player_main_track_pt3, pt3player_main_track_pt3_len, 0, 0);
 
 	uint16_t counter = 0;
 
+	/* Animation: springende Kreise in der Mitte des Bildschirms */
+	int16_t center_x = SCREEN_W / 2;  /* 192 */
+	int16_t center_y = SCREEN_H / 2;  /* 140 */
+	uint8_t anim_frame = 0;
+
 	do
 	{
-		char lnr[15];
-		stringbg = PAL_GREEN;
-		sprintf(lnr, "Popcorn %d. ", counter);
-		print_string(lnr);
-
+		/* Animation: pulsierender Kreis in der Mitte */
+		uint16_t radius = 10 + (anim_frame % 31);
+		
+		/* Kreis zeichnen */
+		hd63484_set_color0(anim_frame % 0x0Fu);
+		hd63484_amove(center_x, center_y);
+		hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+		
+		anim_frame++;
+		if (anim_frame >= 60) anim_frame = 0;
 
 		switch (rec_a_buffer)
 		{
@@ -242,8 +349,13 @@ int main(void)
 		case 'k':
 			struct tm time;
 			tk_read(&time);
-			printf("Datum: %02d.%02d.%04d\n", time.tm_mday, time.tm_mon + 1, time.tm_year + 1900);
-			printf("Uhrzeit: %02d:%02d:%02d\n", time.tm_hour, time.tm_min, time.tm_sec);
+			printf("Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
+				   time.tm_year + 1900,
+				   time.tm_mon + 1,
+				   time.tm_mday,
+				   time.tm_hour,
+				   time.tm_min,
+				   time.tm_sec);
 			break;
 
 		case 'H':
@@ -255,17 +367,18 @@ int main(void)
 		case 'd':
 		{
 			RTC_HOLD_SET();
-			while (RTC_IS_BUSY());
-			
+			while (RTC_IS_BUSY())
+				;
+
 			int d10 = RTC_READ(RTC_REG_D10);
 			int d1 = RTC_READ(RTC_REG_D1);
 			int mo10 = RTC_READ(RTC_REG_MO10);
 			int mo1 = RTC_READ(RTC_REG_MO1);
 			int y10 = RTC_READ(RTC_REG_Y10);
 			int y1 = RTC_READ(RTC_REG_Y1);
-			
+
 			RTC_HOLD_CLR();
-			
+
 			int day = d10 * 10 + d1;
 			int mon = mo10 * 10 + mo1;
 			int year = 2000 + y10 * 10 + y1;
@@ -277,17 +390,18 @@ int main(void)
 		case 't':
 		{
 			RTC_HOLD_SET();
-			while (RTC_IS_BUSY());
-			
+			while (RTC_IS_BUSY())
+				;
+
 			int s10 = RTC_READ(RTC_REG_S10);
 			int s1 = RTC_READ(RTC_REG_S1);
 			int mi10 = RTC_READ(RTC_REG_MI10);
 			int mi1 = RTC_READ(RTC_REG_MI1);
 			int h10 = RTC_READ(RTC_REG_H10) & 0x3;
 			int h1 = RTC_READ(RTC_REG_H1);
-			
+
 			RTC_HOLD_CLR();
-			
+
 			int sec = s10 * 10 + s1;
 			int min = mi10 * 10 + mi1;
 			int hour = h10 * 10 + h1;
@@ -302,7 +416,7 @@ int main(void)
 			}
 			else if (rec_a_buffer != 0)
 			{
-				char buf[2] = { rec_a_buffer, '\0' };
+				char buf[2] = {rec_a_buffer, '\0'};
 				stringbg = PAL_BLACK;
 				print_string(buf);
 			}
