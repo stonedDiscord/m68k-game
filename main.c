@@ -213,11 +213,49 @@ int main(void)
 	hd63484_draw_line(0, SCREEN_H - 1, SCREEN_W - 1, 0, PAL_MAGENTA);
 
 	/* Text on a coloured background */
-	println("Testprogramm fur STELLA Gerate.");
-	println("Und andere Banditen");
-	println("Test1");
-	println("Test2");
+	stringbg = PAL_BLACK;
+	println("Testprogramm:");
+	println(" ");
 
+	/* Test 1: RTC */
+	print_string("Test 1 RTC: ");
+	struct tm time_rtc;
+	if (rtc_get_timespec(&time_rtc) == 0) {
+		stringbg = PAL_GREEN;
+		char datum[32];
+		sprintf(datum, "%04d-%02d-%02d %02d:%02d:%02d",
+			time_rtc.tm_year + 1900,
+			time_rtc.tm_mon + 1,
+			time_rtc.tm_mday,
+			time_rtc.tm_hour,
+			time_rtc.tm_min,
+			time_rtc.tm_sec);
+		println(datum);
+	} else {
+		stringbg = PAL_RED;
+		println("Fehler");
+	}
+	stringbg = PAL_BLACK;
+
+	/* Test 2: TK (Time Keeper) */
+	print_string("Test 2 TK: ");
+	struct tm time;
+	if (tk_read(&time) == 0) {
+		stringbg = PAL_GREEN;
+		char datum[32];
+		sprintf(datum, "%04d-%02d-%02d %02d:%02d:%02d",
+			time.tm_year + 1900,
+			time.tm_mon + 1,
+			time.tm_mday,
+			time.tm_hour,
+			time.tm_min,
+			time.tm_sec);
+		println(datum);
+	} else {
+		stringbg = PAL_RED;
+		println("Fehler");
+	}
+	stringbg = PAL_BLACK;
 	setup_duart();
 	enable_interrupts();
 
@@ -242,8 +280,13 @@ int main(void)
 		case 'k':
 			struct tm time;
 			tk_read(&time);
-			printf("Datum: %02d.%02d.%04d\n", time.tm_mday, time.tm_mon + 1, time.tm_year + 1900);
-			printf("Uhrzeit: %02d:%02d:%02d\n", time.tm_hour, time.tm_min, time.tm_sec);
+			printf("Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
+				time.tm_year + 1900,
+				time.tm_mon + 1,
+				time.tm_mday,
+				time.tm_hour,
+				time.tm_min,
+				time.tm_sec);
 			break;
 
 		case 'H':
