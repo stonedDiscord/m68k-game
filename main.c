@@ -202,7 +202,7 @@ int main(void)
 	hd63484_set_font(font8x8);
 
 	/* 1. Clear to black */
-	hd63484_clear_screen(PAL_GREEN, SCREEN_W, SCREEN_H);
+	hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
 
 	/* 2. White border */
 	hd63484_set_color1(PAL_WHITE);
@@ -336,7 +336,7 @@ int main(void)
 		uint16_t radius = 10 + (anim_frame % 30);  /* Radius zwischen 10 und 39 */
 		
 		/* Neuen Kreis zeichnen - gefüllter Kreis mit varying Größe */
-		hd63484_set_color1(anim_frame % 0x0Fu);
+		hd63484_set_color2(anim_frame % 0x0Fu);
 		hd63484_amove(center_x, center_y);
 		hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 		
