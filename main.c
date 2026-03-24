@@ -287,7 +287,7 @@ int main(void)
 	/* Test 3: DUART */
 	print_string("Test 3 DUART: ");
 
-	if (SRB & RxRDY)
+	if (SRB & TxRDY)
 	{
 		stringbg = PAL_GREEN;
 		println("OK");
@@ -335,24 +335,10 @@ int main(void)
 		/* Animation: pulsierender Kreis in der Mitte */
 		uint16_t radius = 10 + (anim_frame % 30);  /* Radius zwischen 10 und 39 */
 		
-		/* Alten Kreis löschen (mit schwarz füllen) */
-		hd63484_afrct(center_x - 40, center_y - 40, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-		
 		/* Neuen Kreis zeichnen - gefüllter Kreis mit varying Größe */
-		hd63484_set_color1(PAL_YELLOW);
+		hd63484_set_color1(anim_frame % 0x0Fu);
 		hd63484_amove(center_x, center_y);
 		hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-		
-		/* Kleine "Popcorn"-Punkte drumherum - ohne Trigonometrie */
-		hd63484_set_color1(PAL_WHITE);
-		for (int i = 0; i < 6; i++) {
-			/* Einfache Positionsberechnung ohne sin/cos */
-			int dist = radius + 15 + (i % 3) * 10;
-			int px = center_x + ((i == 0 || i == 3) ? dist : (i == 1 || i == 4) ? -dist/2 : dist/2);
-			int py = center_y + ((i < 3) ? -dist/2 : dist/2) + (anim_frame % 2) * 10;
-			hd63484_amove(px, py);
-			hd63484_dot(AREA_NONE, COL_REG_IND, OPM_REPLACE);
-		}
 		
 		anim_frame++;
 		if (anim_frame >= 60) anim_frame = 0;
