@@ -319,9 +319,26 @@ int main(void)
 	}
 	stringbg = PAL_BLACK;
 
-	/* Test 5: RAM */
-	print_string("Test 5 RAM: ");
-	printf("Test 5 RAM: ");
+	/* Test 5: RAMDAC */
+	print_string("Test 5 RAMDAC: ");
+	printf("Test 5 RAMDAC: ");
+	if (false)
+	{
+		stringbg = PAL_GREEN;
+		println("OK");
+		printf("OK\n");
+	}
+	else
+	{
+		stringbg = PAL_RED;
+		println("Fehler");
+		printf("Fehler\n");
+	}
+	stringbg = PAL_BLACK;
+
+	/* Test 6: RAM */
+	print_string("Test 6 RAM: ");
+	printf("Test 6 RAM: ");
 	volatile uint16_t *ramtest_addr = (volatile uint16_t *)0xfc0080;
 	*ramtest_addr = 0x1234;
 	if (*ramtest_addr == 0x1234)
