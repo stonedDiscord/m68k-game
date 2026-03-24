@@ -212,13 +212,17 @@ int main(void)
 	hd63484_draw_line(0, 0, SCREEN_W - 1, SCREEN_H - 1, PAL_CYAN);
 	hd63484_draw_line(0, SCREEN_H - 1, SCREEN_W - 1, 0, PAL_MAGENTA);
 
+	setup_duart();
+
 	/* Text on a coloured background */
 	stringbg = PAL_BLACK;
 	println("Testprogramm:");
+	printf("Testprogramm\n\n");
 	println(" ");
 
 	/* Test 1: RTC */
 	print_string("Test 1 RTC: ");
+	printf("Test 1 RTC: ");
 	struct tm time_rtc;
 	if (rtc_get_timespec(&time_rtc) == 0) {
 		stringbg = PAL_GREEN;
@@ -231,9 +235,17 @@ int main(void)
 			time_rtc.tm_min,
 			time_rtc.tm_sec);
 		println(datum);
+		printf("OK, Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
+				time.tm_year + 1900,
+				time.tm_mon + 1,
+				time.tm_mday,
+				time.tm_hour,
+				time.tm_min,
+				time.tm_sec);
 	} else {
 		stringbg = PAL_RED;
 		println("Fehler");
+		printf("Fehler\n");
 	}
 	stringbg = PAL_BLACK;
 
@@ -251,13 +263,19 @@ int main(void)
 			time.tm_min,
 			time.tm_sec);
 		println(datum);
+				printf("OK, Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
+				time.tm_year + 1900,
+				time.tm_mon + 1,
+				time.tm_mday,
+				time.tm_hour,
+				time.tm_min,
+				time.tm_sec);
 	} else {
 		stringbg = PAL_RED;
 		println("Fehler");
+		printf("Fehler\n");
 	}
 	stringbg = PAL_BLACK;
-
-	setup_duart();
 
 	/* Test 3: DUART */
 	print_string("Test 3 DUART: ");
@@ -265,9 +283,11 @@ int main(void)
 	if (SRB & RxRDY && SRB & TxRDY) {
 		stringbg = PAL_GREEN;
 		println("OK");
+		printf("OK\n");
 	} else {
 		stringbg = PAL_RED;
 		println("Fehler");
+		printf("Fehler\n");
 	}
 	stringbg = PAL_BLACK;
 
@@ -277,15 +297,15 @@ int main(void)
 	if (hd63484_read_sr() & SR_CED) {
 		stringbg = PAL_GREEN;
 		println("OK");
+		printf("OK\n");
 	} else {
 		stringbg = PAL_RED;
 		println("Fehler");
+		printf("Fehler\n");
 	}
 	stringbg = PAL_BLACK;
 
 	enable_interrupts();
-
-	printf("Hello, world!\n");
 
 	/* Initialize PT3 player */
 	func_setup_music(pt3player_main_track_pt3, pt3player_main_track_pt3_len, 0, 0);
