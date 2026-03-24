@@ -95,27 +95,33 @@ funlddlx: split
 	cp rom.1.u2.bin fldl_f6_2.bin && \
 	cp rom.2.u6.bin fldl_f6_1.bin && \
 	truncate --size=512K fldl_f6_1.bin && \
-	truncate --size=512K fldl_f6_2.bin && \
-	zip -q funlddlx.zip fldl_f6_1.bin fldl_f6_2.bin && \
-	rm fldl_f6_1.bin fldl_f6_2.bin
+	truncate --size=512K fldl_f6_2.bin
+
+funlddlxzip: funlddlx
+	cd $(ROMDIR) && \
+	zip -q funlddlx.zip fldl_f6_1.bin fldl_f6_2.bin
 
 moneyf1: split
 	cd $(ROMDIR) && \
 	cp rom.1.u2.bin m27c1001_money_f1_ic1 && \
 	cp rom.2.u6.bin m27c1001_money_f1_ic2 && \
 	truncate --size=128K m27c1001_money_f1_ic1 && \
-	truncate --size=128K m27c1001_money_f1_ic2 && \
-	zip moneyf1.zip m27c1001_money_f1_ic1 m27c1001_money_f1_ic2 && \
-	rm m27c1001_money_f1_ic1 m27c1001_money_f1_ic2
+	truncate --size=128K m27c1001_money_f1_ic2
+
+moneyf1zip: moneyf1
+	cd $(ROMDIR) && \
+	zip moneyf1.zip m27c1001_money_f1_ic1 m27c1001_money_f1_ic2
 
 skattva: split
 	cd $(ROMDIR) && \
 	cp rom.1.u2.bin skat_tv_version_ts3.1.u2.bin && \
 	cp rom.2.u6.bin skat_tv_version_ts3.2.u6.bin && \
 	truncate --size=128K skat_tv_version_ts3.1.u2.bin && \
-	truncate --size=128K skat_tv_version_ts3.2.u6.bin && \
-	zip skattva.zip skat_tv_version_ts3.1.u2.bin skat_tv_version_ts3.2.u6.bin && \
-	rm skat_tv_version_ts3.1.u2.bin skat_tv_version_ts3.2.u6.bin
+	truncate --size=128K skat_tv_version_ts3.2.u6.bin
+
+skattvazip: skattva
+	cd $(ROMDIR) && \
+	zip skattva.zip skat_tv_version_ts3.1.u2.bin skat_tv_version_ts3.2.u6.bin
 
 skattv: split
 	cd $(ROMDIR) && \
@@ -126,9 +132,11 @@ skattv: split
 	truncate --size=128K f2_i.bin && \
 	truncate --size=128K f2_ii.bin && \
 	truncate --size=128K f1_i.bin && \
-	truncate --size=128K f1_ii.bin && \
-	zip skattv.zip f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin && \
-	rm f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
+	truncate --size=128K f1_ii.bin
+
+skattvzip: skattv
+	cd $(ROMDIR) && \
+	zip skattv.zip f2_i.bin f2_ii.bin f1_i.bin f1_ii.bin
 
 burn: split
 	cd $(ROMDIR) && \
@@ -140,17 +148,17 @@ burn: split
 	read -n1 -r -p "Swap the ROM and press any key..." key && \
 	minipro -p W27E040 -w rom.2.expanded.u6.bin
 
-testr: funlddlx
+testr: funlddlxzip
 	cp $(ROMDIR)/funlddlx.zip /run/media/stoned/schrott/Roms/mame/roms/
 	cd /run/media/stoned/schrott/msys64/src/mame/
 	/run/media/stoned/schrott/msys64/src/mame/mame funlddlx -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window
 
-test: skattv
+test: skattvzip
 	cp $(ROMDIR)/skattv.zip /run/media/stoned/schrott/Roms/mame/roms/
 	cd /run/media/stoned/schrott/msys64/src/mame/
 	/run/media/stoned/schrott/msys64/src/mame/mame skattv -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window
 
-testn: moneyf1
+testn: moneyf1zip
 	cp $(ROMDIR)/moneyf1.zip /run/media/stoned/schrott/Roms/mame/roms/
 	cd /run/media/stoned/schrott/msys64/src/mame/
 	/run/media/stoned/schrott/msys64/src/mame/mame moneyf1 -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window -debug
