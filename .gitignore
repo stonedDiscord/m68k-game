@@ -65,4 +65,4 @@ snap/
 *.pdf
 
 music_data.c
-music/track.pt3
+music/*.pt3
