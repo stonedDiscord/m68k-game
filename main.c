@@ -333,10 +333,10 @@ int main(void)
 	do
 	{
 		/* Animation: pulsierender Kreis in der Mitte */
-		uint16_t radius = 10 + (anim_frame % 30);  /* Radius zwischen 10 und 39 */
+		uint16_t radius = 10 + (anim_frame % 31);
 		
-		/* Neuen Kreis zeichnen - gefüllter Kreis mit varying Größe */
-		hd63484_set_color2(anim_frame % 0x0Fu);
+		/* Kreis zeichnen */
+		hd63484_set_color0(anim_frame % 0x0Fu);
 		hd63484_amove(center_x, center_y);
 		hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 		
