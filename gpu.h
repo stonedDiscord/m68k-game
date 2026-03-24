@@ -370,61 +370,6 @@ extern volatile uint16_t *hd63484_control;  /* RS=1 : data / FIFO        */
 #define VRAM_BASE   0x00000UL
 
 /* ---------------------------------------------------------------------------
- * Initialization config structure
- *
- * All timing values are in memory cycles (horizontal) or rasters (vertical).
- * Refer to the manual for the HC = H-1, HDS = HS-1 encoding rules:
- *   hc  = total_horizontal_cycles - 1
- *   hsw = sync_width_in_cycles          (2–31)
- *   hds = front_porch_cycles - 1
- *   hdw = display_width_cycles - 1
- *   vc  = total_vertical_rasters
- *   vsw = vsync_pulse_rasters            (1–31)
- *   vds = vertical_display_start - 1
- *   vdw = vertical_display_height        (raw raster count)
- * ---------------------------------------------------------------------------*/
-typedef struct {
-    /* CCR – set before STR */
-    uint8_t  gbm;        /* GBM_1BPP .. GBM_16BPP                 */
-    uint16_t ccr_ie;     /* interrupt enable bits (CCR_CRE etc.)   */
-
-    /* OMR */
-    uint8_t  acm;        /* ACM_SINGLE / ACM_INTERLEAVED / ACM_SUPER */
-    uint8_t  gai;        /* GAI_INC1 … GAI_INC1_2                  */
-    uint8_t  rsm;        /* RSM_NONINTERLACE etc.                   */
-    uint8_t  ram_mode;   /* 0=DRAM refresh, 1=SRAM                 */
-    uint8_t  acp;        /* 0=display priority, 1=drawing priority  */
-
-    /* DCR */
-    uint16_t dcr;        /* full DCR word (use DCR_* + SE_* macros) */
-
-    /* Horizontal timing (HSR r82) */
-    uint16_t hc;        /* horizontal cycle  (H-1, 0–4095)       */
-    uint8_t  hsw;        /* horizontal sync width (2–31)           */
-
-    /* Horizontal display (HDR r84) */
-    uint8_t  hds;        /* horizontal display start (HS-1)        */
-    uint8_t  hdw;        /* horizontal display width (HW-1)        */
-
-    /* Vertical sync (VSR r86) */
-    uint16_t vc;         /* vertical cycle (rasters, 1–4095)       */
-
-    /* Vertical display (VDR r88) */
-    uint8_t  vds;        /* vertical display start (VS-1)          */
-    uint8_t  vsw;        /* vertical sync width (1–31)             */
-
-    /* Split screen (Base only – SSW r8A) */
-    uint16_t sp1;        /* Base screen vertical width in rasters  */
-
-    /* Base screen (screen 1) display RAM */
-    uint16_t mwr1;       /* memory width in 16-bit words           */
-    uint32_t sar1;       /* 20-bit start address                   */
-
-    /* Drawing: initial origin / drawing pointer */
-    uint32_t draw_base;  /* 20-bit physical frame buffer base addr  */
-} hd63484_config_t;
-
-/* ---------------------------------------------------------------------------
  * Public API
  * ---------------------------------------------------------------------------*/
 
@@ -448,8 +393,8 @@ void     hd63484_abort(void);
 void     hd63484_start(void);
 void     hd63484_stop(void);
 
-/* Full initialization from config struct */
-void     hd63484_init(const hd63484_config_t *cfg);
+/* Full initialization with hardcoded values */
+void     hd63484_init(void);
 
 /* Drawing parameter registers (via WPR/RPR over FIFO) */
 void     hd63484_wpr(uint8_t pr_addr, uint16_t value);

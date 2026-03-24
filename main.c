@@ -168,34 +168,7 @@ void dump_input(uint8_t n)
 
 int main(void)
 {
-	hd63484_config_t cfg;
-
-	cfg.gbm = GBM_4BPP;
-	cfg.ccr_ie = 0;
-
-	cfg.acm = ACM_SINGLE;
-	cfg.gai = GAI_INC1; /* 1 word/cycle = 4 pixels at 4bpp */
-	cfg.rsm = RSM_NONINTERLACE;
-	cfg.ram_mode = 1; /* static RAM, no DRAM refresh      */
-	cfg.acp = 0;	  /* display priority                 */
-
-	cfg.dcr = DCR_DSP | DCR_SE1; /* Base screen on, standard DISP */
-
-	cfg.hc = HTOTAL;
-	cfg.hsw = HSYNC_W;
-	cfg.hds = HDISP_S;
-	cfg.hdw = HDISP_W;
-
-	cfg.vc = VTOTAL;
-	cfg.vsw = VSYNC_W;
-	cfg.vds = VDISP_S;
-	cfg.sp1 = SCREEN_RASTERS;
-
-	cfg.mwr1 = MEM_WIDTH;
-	cfg.sar1 = VRAM_BASE;
-	cfg.draw_base = VRAM_BASE;
-
-	hd63484_init(&cfg);
+	hd63484_init();
 
 	ramdac_reset();
 

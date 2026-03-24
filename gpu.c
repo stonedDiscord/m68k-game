@@ -208,19 +208,19 @@ void hd63484_stop(void)
  *  7. Set ORG and initial drawing parameters via FIFO commands
  *  8. Set STR=1 to start
  * ===========================================================================*/
-void hd63484_init(const hd63484_config_t *cfg)
+void hd63484_init(void)
 {
     /* ---- 1. Reset ---- */
     hd63484_reset();
 
     /* Store screen height for Y-coordinate flipping in drawing wrappers */
-    hd63484_screen_height = (int16_t)cfg->sp1;
+    hd63484_screen_height = (int16_t)SCREEN_RASTERS;
 
     /* ---- 2. CCR ---- */
     {
         uint16_t ccr = 0;
-        ccr |= (uint16_t)(cfg->gbm & 0x7u) << CCR_GBM_SHIFT;
-        ccr |= cfg->ccr_ie & 0x00FFu; /* interrupt enables in low byte */
+        ccr |= (uint16_t)(GBM_4BPP & 0x7u) << CCR_GBM_SHIFT;
+        ccr |= 0 & 0x00FFu; /* interrupt enables in low byte: none */
         hd63484_write_reg(REG_CCR, ccr);
     }
 
@@ -228,20 +228,20 @@ void hd63484_init(const hd63484_config_t *cfg)
     {
         uint16_t omr = 0;
         omr |= OMR_MIS;                              /* single chip = master */
-        omr |= (uint16_t)(cfg->acp ? 1u : 0u) << 13; /* ACP */
+        omr |= (uint16_t)(0u) << 13;                 /* ACP: display priority */
         /* CSK=01, DSK=01 (1 cycle skew) – safe default for most systems */
         omr |= (1u << OMR_CSK_SHIFT);
         omr |= (1u << OMR_DSK_SHIFT);
-        omr |= (uint16_t)(cfg->ram_mode ? 1u : 0u) << 7; /* RAM */
-        omr |= (uint16_t)(cfg->gai & 0x7u) << OMR_GAI_SHIFT;
-        omr |= (uint16_t)(cfg->acm & 0x3u) << OMR_ACM_SHIFT;
-        omr |= (uint16_t)(cfg->rsm & 0x3u);
+        omr |= (uint16_t)(1u) << 7;                  /* RAM: SRAM mode */
+        omr |= (uint16_t)(GAI_INC1 & 0x7u) << OMR_GAI_SHIFT;
+        omr |= (uint16_t)(ACM_SINGLE & 0x3u) << OMR_ACM_SHIFT;
+        omr |= (uint16_t)(RSM_NONINTERLACE & 0x3u);
         /* NOTE: STR is NOT set here – must be last */
         hd63484_write_reg(REG_OMR, omr);
     }
 
     /* ---- 4. DCR ---- */
-    hd63484_write_reg(REG_DCR, cfg->dcr);
+    hd63484_write_reg(REG_DCR, DCR_DSP | DCR_SE1); /* Base screen on */
 
     /* ---- 5. Timing Control RAM (r80–r9F, block write) ----
      *
@@ -258,22 +258,22 @@ void hd63484_init(const hd63484_config_t *cfg)
     *hd63484_control = 0x0000;
 
     /* r82–r83  HSR: HC in high byte, HSW in low bits */
-    *hd63484_control = ((uint16_t)cfg->hc << 8) |
-                       (cfg->hsw & 0x1Fu);
+    *hd63484_control = ((uint16_t)HTOTAL << 8) |
+                       (HSYNC_W & 0x1Fu);
 
     /* r84–r85  HDR: HDS in high byte, HDW in low byte */
-    *hd63484_control = ((uint16_t)cfg->hds << 8) |
-                       cfg->hdw;
+    *hd63484_control = ((uint16_t)HDISP_S << 8) |
+                       HDISP_W;
 
     /* r86–r87  VSR: VC (12-bit vertical cycle) */
-    *hd63484_control = cfg->vc & 0x0FFFu;
+    *hd63484_control = VTOTAL & 0x0FFFu;
 
     /* r88–r89  VDR: VDS in high byte (bits 15–8), VSW in low bits (4–0) */
-    *hd63484_control = ((uint16_t)cfg->vds << 8) |
-                       (cfg->vsw & 0x1Fu);
+    *hd63484_control = ((uint16_t)VDISP_S << 8) |
+                       (VSYNC_W & 0x1Fu);
 
     /* r8A–r8B  SSW Base width (SP1) */
-    *hd63484_control = cfg->sp1 & 0x0FFFu;
+    *hd63484_control = SCREEN_RASTERS & 0x0FFFu;
 
     /* r8C–r8D  SSW Upper width (SP0) – disabled, write 0 */
     *hd63484_control = 0x0000;
@@ -321,9 +321,9 @@ void hd63484_init(const hd63484_config_t *cfg)
 
     /* Screen 1 (Base) — active display screen */
     *hd63484_control = 0x0000;                                  /* RAR1: no raster offset  */
-    *hd63484_control = cfg->mwr1 & 0x03FFu;                     /* MWR1: width (CHR=0)     */
-    *hd63484_control = (uint16_t)((cfg->sar1 >> 16) & 0x000Fu); /* SAR1H: addr bits 19–16 */
-    *hd63484_control = (uint16_t)(cfg->sar1 & 0xFFFFu);         /* SAR1L: addr bits 15–0   */
+    *hd63484_control = MEM_WIDTH & 0x03FFu;                     /* MWR1: width (CHR=0)     */
+    *hd63484_control = (uint16_t)((VRAM_BASE >> 16) & 0x000Fu); /* SAR1H: addr bits 19–16 */
+    *hd63484_control = (uint16_t)(VRAM_BASE & 0xFFFFu);         /* SAR1L: addr bits 15–0   */
 
     /* Screen 2 (Lower) — disabled, all zero */
     *hd63484_control = 0x0000; /* RAR2 */
@@ -360,14 +360,14 @@ void hd63484_init(const hd63484_config_t *cfg)
      * Or use the convenience wrapper hd63484_screen_y() defined in gpu.h.
      */
     {
-        uint32_t org_addr = cfg->draw_base +
-                            (uint32_t)(cfg->sp1 - 1) * (uint32_t)cfg->mwr1;
+        uint32_t org_addr = VRAM_BASE +
+                            (uint32_t)(SCREEN_RASTERS - 1) * (uint32_t)MEM_WIDTH;
         hd63484_set_origin(0x1 /* DN_BASE */, org_addr, 0);
     }
 
-    /* Drawing pointer: base screen, starting at draw_base */
-    hd63484_set_dp(0x1, cfg->draw_base, 0);
-    hd63484_set_rwp(0x1, cfg->draw_base);
+    /* Drawing pointer: base screen, starting at VRAM_BASE */
+    hd63484_set_dp(0x1, VRAM_BASE, 0);
+    hd63484_set_rwp(0x1, VRAM_BASE);
 
     /* Solid white pattern, replace mode */
     hd63484_set_solid_pattern();
@@ -377,10 +377,6 @@ void hd63484_init(const hd63484_config_t *cfg)
 
     /* ---- 8. Start ---- */
     hd63484_start();
-    /* Note: no wait_ced() here. In MAME the chip executes synchronously -
-     * every command completes inside the write16 call that delivers its last
-     * parameter, so CED is already 1 when hd63484_start() returns.
-     * On real hardware you would poll CED here before issuing drawing commands. */
 }
 
 /* ===========================================================================
