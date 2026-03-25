@@ -78,11 +78,12 @@ static volatile uint8_t * const rtc_address = (volatile uint8_t *)RTC_BASE;
 #define RTC_H10_PM          (1u << 2)   /* 1 = PM, 0 = AM  (12H mode only)      */
 
 /* ---------------------------------------------------------------------------
- * Register access macros
- * ---------------------------------------------------------------------------
- */
-#define RTC_READ(reg)           (rtc_address[(reg)] & 0x0Fu)
-#define RTC_WRITE(reg, val)     (rtc_address[(reg)] = (uint8_t)((val) & 0x0Fu))
+ /* Register access macros
+  * ---------------------------------------------------------------------------
+  */
+ #define RTC_READ(reg)           (rtc_address[(reg) * 2] & 0x0Fu)
+ #define RTC_WRITE(reg, val)     (rtc_address[(reg) * 2] = (uint8_t)((val) & 0x0Fu))
+
 
 /* ---------------------------------------------------------------------------
  * Convenience: read/write the full time & date under HOLD

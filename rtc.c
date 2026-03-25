@@ -37,7 +37,10 @@ int rtc_get(struct tm *t)
  
     RTC_HOLD_CLR();
 
-    if (d1 == 0 || mo1 == 0) /* day and month can't be zero */
+    int day = bcd(d10, d1);
+    int month = bcd(mo10, mo1);
+
+    if (day == 0 || month == 0) /* day and month can't be zero */
     {
         return -1; /* invalid BCD value(s) */
     }
@@ -45,10 +48,10 @@ int rtc_get(struct tm *t)
     t->tm_sec  = bcd(s10,  s1);
     t->tm_min  = bcd(mi10, mi1);
     t->tm_hour = bcd(h10,  h1);
-    t->tm_mday = bcd(d10,  d1);
-    t->tm_mon  = bcd(mo10, mo1) - 1;
+    t->tm_mday = day;
+    t->tm_mon  = month - 1;
     t->tm_year = 2000 + bcd(y10, y1) - 1900;
-    t->tm_wday = 0;
+    t->tm_wday = bcd(0, w) - 1; /* chip: 1-7, tm_wday: 0-6 */
     t->tm_yday = 0;
     t->tm_isdst = -1;
 
@@ -75,7 +78,10 @@ int rtc_set(const struct tm *t)
     RTC_WRITE(RTC_REG_MO1,  (t->tm_mon + 1) % 10);
     RTC_WRITE(RTC_REG_Y10,  (t->tm_year + 1900 - 2000) / 10);
     RTC_WRITE(RTC_REG_Y1,   (t->tm_year + 1900 - 2000) % 10);
-    RTC_WRITE(RTC_REG_W,    (t->tm_wday + 1) % 7); /* chip: 1-7, tm_wday: 0-6 */
+    RTC_WRITE(RTC_REG_W,    t->tm_wday + 1); /* chip: 1-7, tm_wday: 0-6 */
+
+    /* Ensure 24H mode is set */
+    RTC_WRITE(RTC_REG_CE, RTC_READ(RTC_REG_CE) | RTC_CE_24_12);
 
     RTC_HOLD_CLR();
 
