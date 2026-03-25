@@ -230,28 +230,26 @@ int main(void)
 	if (rtc_get_timespec(&time_rtc) == 0)
 	{
 		hd63484_set_color_bg(PAL_GREEN);
-		char datum[32];
-		sprintf(datum, "%04d-%02d-%02d %02d:%02d:%02d",
-				time_rtc.tm_year + 1900,
-				time_rtc.tm_mon + 1,
-				time_rtc.tm_mday,
-				time_rtc.tm_hour,
-				time_rtc.tm_min,
-				time_rtc.tm_sec);
-		println(datum);
-		printf("OK, Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
-			   time_rtc.tm_year + 1900,
-			   time_rtc.tm_mon + 1,
-			   time_rtc.tm_mday,
-			   time_rtc.tm_hour,
-			   time_rtc.tm_min,
-			   time_rtc.tm_sec);
+		print_string("OK\n");
+		printf("OK\n");
 	}
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		println("Nein");
+		print_string("Nein\n");
 		printf("Nein\n");
+	}
+	{
+	char datum[32];
+	sprintf(datum, "Datum %04d-%02d-%02d\nZeit %02d:%02d:%02d\n",
+			time_rtc.tm_year + 1900,
+			time_rtc.tm_mon + 1,
+			time_rtc.tm_mday,
+			time_rtc.tm_hour,
+			time_rtc.tm_min,
+			time_rtc.tm_sec);
+	print_string(datum);
+	printf(datum);
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
@@ -262,28 +260,26 @@ int main(void)
 	if (tk_read(&time) == 0)
 	{
 		hd63484_set_color_bg(PAL_GREEN);
-		char datum[32];
-		sprintf(datum, "%04d-%02d-%02d %02d:%02d:%02d",
-				time.tm_year + 1900,
-				time.tm_mon + 1,
-				time.tm_mday,
-				time.tm_hour,
-				time.tm_min,
-				time.tm_sec);
-		println(datum);
-		printf("OK, Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
-			   time.tm_year + 1900,
-			   time.tm_mon + 1,
-			   time.tm_mday,
-			   time.tm_hour,
-			   time.tm_min,
-			   time.tm_sec);
+		print_string("OK\n");
+		printf("OK\n");
 	}
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		println("Nein");
+		print_string("Nein\n");
 		printf("Nein\n");
+	}
+	{
+	char datum[32];
+	sprintf(datum, "Datum %04d-%02d-%02d\nZeit %02d:%02d:%02d\n",
+			time.tm_year + 1900,
+			time.tm_mon + 1,
+			time.tm_mday,
+			time.tm_hour,
+			time.tm_min,
+			time.tm_sec);
+	print_string(datum);
+	printf(datum);
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
@@ -322,8 +318,8 @@ int main(void)
 	hd63484_set_color_bg(PAL_BLACK);
 
 	/* Test 6: RAM */
-	print_string("Test 6 RAM: ");
-	printf("Test 6 RAM: ");
+	print_string("Test 6 Erweiterter RAM: ");
+	printf("Test 6 Erweiterter RAM: ");
 	volatile uint16_t *ramtest_addr = (volatile uint16_t *)0xfc0080;
 	*ramtest_addr = 0x1234;
 	if (*ramtest_addr == 0x1234)
