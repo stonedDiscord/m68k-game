@@ -195,6 +195,52 @@ void hd63484_stop(void)
     hd63484_write_reg(REG_OMR, omr & (uint16_t)~OMR_STR);
 }
 
+/*
+ * hd63484_disable_screen – zero out MWR for one screen so the chip
+ * skips it entirely during display.  Safe to call after hd63484_init().
+ *
+ * screen: SCREEN_UPPER(0), SCREEN_BASE(1), SCREEN_LOWER(2), SCREEN_WINDOW(3)
+ *
+ * We only need to zero MWR — the chip treats MWR=0 as "screen disabled"
+ * regardless of SAR.  We use a targeted write rather than a block write
+ * so we don't disturb adjacent screens.
+ *
+ * MWR register addresses:
+ *   Screen 0: 0xC2   Screen 1: 0xCA   Screen 2: 0xD2   Screen 3: 0xDA
+ */
+void hd63484_disable_screen(uint8_t screen)
+{
+    static const uint8_t mwr_addrs[4] = {
+        REG_MWR0, REG_MWR1, REG_MWR2, REG_MWR3
+    };
+    if (screen > 3u) return;
+    hd63484_write_reg(mwr_addrs[screen], 0x0000u);
+}
+
+/*
+ * hd63484_enable_screen – (re)point a screen at a valid VRAM address.
+ *
+ * Writes RAR=0 (graphic mode), MWR=mem_width, SAR high+low.
+ * Use this if you need to swap which screen is active at runtime,
+ * e.g. after detecting which half of the address space is RAM.
+ *
+ * vram_addr: 20-bit word address (same format as VRAM_LOWER/VRAM_UPPER)
+ * mem_width: words per line, e.g. MEM_WIDTH (96)
+ */
+void hd63484_enable_screen(uint8_t screen, uint32_t vram_addr, uint16_t mem_width)
+{
+    static const uint8_t rar_addrs[4] = {
+        REG_RAR0, REG_RAR1, REG_RAR2, REG_RAR3
+    };
+    if (screen > 3u) return;
+
+    hd63484_write_ar(rar_addrs[screen]);           /* auto-inc from RAR */
+    *hd63484_control = 0x0000u;                    /* RAR: graphic mode */
+    *hd63484_control = mem_width & 0x03FFu;        /* MWR              */
+    *hd63484_control = (uint16_t)((vram_addr >> 16) & 0x000Fu); /* SARH */
+    *hd63484_control = (uint16_t)(vram_addr & 0xFFFFu);         /* SARL */
+}
+
 /* ===========================================================================
  * Full initialisation
  *
@@ -314,28 +360,16 @@ void hd63484_init(void)
     hd63484_write_ar(REG_RAR0); /* = 0xC0, auto-inc from here */
 
     /* Screen 0 (Upper) */
-    *hd63484_control = 0x0000;                                   /* RAR0: no raster offset */
-    *hd63484_control = MEM_WIDTH & 0x03FFu;                      /* MWR0: width (CHR=0)    */
-    *hd63484_control = (uint16_t)((VRAM_UPPER >> 16) & 0x000Fu); /* SAR0H: addr bits 19–16 */
-    *hd63484_control = (uint16_t)(VRAM_UPPER & 0xFFFFu);         /* SAR0L: addr bits 15–0  */
+    hd63484_enable_screen(SCREEN_UPPER,VRAM_UPPER,MEM_WIDTH & 0x03FFu);
 
     /* Screen 1 (Base) - disabled */
-    *hd63484_control = 0x0000; /* RAR0: no raster offset     */
-    *hd63484_control = 0x0000; /* MWR0: 0 (disabled)         */
-    *hd63484_control = 0x0000; /* SAR0H                      */
-    *hd63484_control = 0x0000; /* SAR0L                      */
+    hd63484_disable_screen(SCREEN_BASE);
 
     /* Screen 2 (Lower) */
-    *hd63484_control = 0x0000;                                   /* RAR2: no raster offset */
-    *hd63484_control = MEM_WIDTH & 0x03FFu;                      /* MWR2: width (CHR=0)    */
-    *hd63484_control = (uint16_t)((VRAM_LOWER >> 16) & 0x000Fu); /* SAR2H: addr bits 19–16 */
-    *hd63484_control = (uint16_t)(VRAM_LOWER & 0xFFFFu);         /* SAR2L: addr bits 15–0  */
+    hd63484_enable_screen(SCREEN_LOWER,VRAM_LOWER,MEM_WIDTH & 0x03FFu);
 
     /* Screen 3 (Window) - disabled, all zero */
-    *hd63484_control = 0x0000; /* RAR3  */
-    *hd63484_control = 0x0000; /* MWR3  */
-    *hd63484_control = 0x0000; /* SAR3H */
-    *hd63484_control = 0x0000; /* SAR3L */
+    hd63484_disable_screen(SCREEN_WINDOW);
 
     /* ---- 7. Drawing parameter setup via FIFO ---- */
 

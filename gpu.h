@@ -69,17 +69,15 @@ extern volatile uint16_t *hd63484_control;  /* RS=1 : data / FIFO        */
 #define REG_GCR     0x96u   /* Graphic Cursor                */
 
 /* Display Control RAM (rC0–rDF, auto-increment)
- *
- * Layout per screen (each register is one 16-bit word):
- *   Screen 0 (Upper):  RAR0=rC0, MWR0=rC2, SAR0H=rC4, SAR0L=rC6
- *   Screen 1 (Base):   RAR1=rC8, MWR1=rCA, SAR1H=rCC, SAR1L=rCE
- *   Screen 2 (Lower):  RAR2=rD0, MWR2=rD2, SAR2H=rD4, SAR2L=rD6
- *   Screen 3 (Window): RAR3=rD8, MWR3=rDA, SAR3H=rDC, SAR3L=rDE
- *
  * RAR = Raster Address (first/last raster for char screens, 0 for graphic)
  * MWR = Memory Width in 16-bit words per line (CHR bit 15 = char/graphic select)
  * SAR = 20-bit Start Address split across H (bits 19-16) and L (bits 15-0)
  */
+#define SCREEN_UPPER  0u // RAR0=rC0, MWR0=rC2, SAR0H=rC4, SAR0L=rC6
+#define SCREEN_BASE   1u // RAR1=rC8, MWR1=rCA, SAR1H=rCC, SAR1L=rCE
+#define SCREEN_LOWER  2u // RAR2=rD0, MWR2=rD2, SAR2H=rD4, SAR2L=rD6
+#define SCREEN_WINDOW 3u // RAR3=rD8, MWR3=rDA, SAR3H=rDC, SAR3L=rDE
+
 #define REG_RAR0    0xC0u   /* Screen 0 (Upper) Raster Address      */
 #define REG_MWR0    0xC2u   /* Screen 0 Memory Width                 */
 #define REG_SAR0H   0xC4u   /* Screen 0 Start Address High           */
@@ -407,6 +405,9 @@ void     hd63484_rptn(uint8_t pra, uint8_t n, uint16_t *data);
 
 /* Origin – set by hd63484_init(), not normally called directly */
 void     hd63484_set_origin(uint8_t dn, uint32_t addr, uint8_t dot);
+
+void     hd63484_disable_screen(uint8_t screen);
+void     hd63484_enable_screen(uint8_t screen, uint32_t vram_addr, uint16_t mem_width);
 
 /* ---------------------------------------------------------------------------
  * Coordinate system
