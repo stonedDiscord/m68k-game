@@ -303,6 +303,15 @@ int main(void)
 		hd63484_set_color_bg(PAL_GREEN);
 		println("OK");
 		printf("OK\n");
+		hd63484_enable_screen(SCREEN_BASE, VRAM_UPPER, MEM_WIDTH & 0x03FFu);
+		{
+			uint32_t org_addr = VRAM_UPPER +
+								(uint32_t)(SCREEN_RASTERS - 1) * (uint32_t)MEM_WIDTH;
+			hd63484_set_origin(0x1 /* DN_BASE */, org_addr, 0);
+		}
+
+		hd63484_set_dp(0x1, VRAM_UPPER, 0);
+		hd63484_set_rwp(0x1, VRAM_UPPER);
 	}
 	else
 	{
@@ -339,22 +348,23 @@ int main(void)
 	uint16_t counter = 0;
 
 	/* Animation: springende Kreise in der Mitte des Bildschirms */
-	int16_t center_x = SCREEN_W / 2;  /* 192 */
-	int16_t center_y = SCREEN_H / 2;  /* 140 */
+	int16_t center_x = SCREEN_W / 2; /* 192 */
+	int16_t center_y = SCREEN_H / 2; /* 140 */
 	uint8_t anim_frame = 0;
 
 	do
 	{
 		/* Animation: pulsierender Kreis in der Mitte */
 		uint16_t radius = 10 + (anim_frame % 31);
-		
+
 		/* Kreis zeichnen */
 		hd63484_set_color_bg(anim_frame % 0x0Fu);
 		hd63484_amove(center_x, center_y);
 		hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-		
+
 		anim_frame++;
-		if (anim_frame >= 60) anim_frame = 0;
+		if (anim_frame >= 60)
+			anim_frame = 0;
 
 		switch (rec_a_buffer)
 		{
