@@ -233,7 +233,7 @@ void hd63484_enable_screen(uint8_t screen, uint32_t vram_addr, uint16_t mem_widt
     static const uint8_t rar_addrs[4] = {
         REG_RAR0, REG_RAR1, REG_RAR2, REG_RAR3
     };
-    if (screen > 3u) return;
+    if (screen > SCREEN_WINDOW) return;
 
     hd63484_write_ar(rar_addrs[screen]);           /* auto-inc from RAR */
     *hd63484_control = 0x0000u;                    /* RAR: graphic mode */
@@ -358,31 +358,18 @@ void hd63484_init(void)
      * We write all four screens contiguously starting at rC0.
      * Screens 0, 2, 3 are disabled (zeroed); screen 1 (Base) carries our values.
      */
-    hd63484_write_ar(REG_RAR0); /* = 0xC0, auto-inc from here */
 
     /* Screen 0 (Upper) */
-    *hd63484_control = 0x0000; /* RAR0: no raster offset     */
-    *hd63484_control = 0x0000; /* MWR0: 0 (disabled)         */
-    *hd63484_control = 0x0000; /* SAR0H                      */
-    *hd63484_control = 0x0000; /* SAR0L                      */
+    hd63484_disable_screen(SCREEN_UPPER);
 
     /* Screen 1 (Base) — active display screen */
-    *hd63484_control = 0x0000;                                  /* RAR1: no raster offset  */
-    *hd63484_control = MEM_WIDTH & 0x03FFu;                     /* MWR1: width (CHR=0)     */
-    *hd63484_control = (uint16_t)((VRAM_LOWER >> 16) & 0x000Fu); /* SAR1H: addr bits 19–16 */
-    *hd63484_control = (uint16_t)(VRAM_LOWER & 0xFFFFu);         /* SAR1L: addr bits 15–0   */
+    hd63484_enable_screen(SCREEN_BASE,VRAM_LOWER,MEM_WIDTH & 0x03FFu);
 
     /* Screen 2 (Lower) — disabled, all zero */
-    *hd63484_control = 0x0000; /* RAR2 */
-    *hd63484_control = 0x0000; /* MWR2 */
-    *hd63484_control = 0x0000; /* SAR2H */
-    *hd63484_control = 0x0000; /* SAR2L */
+    hd63484_disable_screen(SCREEN_LOWER);
 
     /* Screen 3 (Window) — disabled, all zero */
-    *hd63484_control = 0x0000; /* RAR3 */
-    *hd63484_control = 0x0000; /* MWR3 */
-    *hd63484_control = 0x0000; /* SAR3H */
-    *hd63484_control = 0x0000; /* SAR3L */
+    hd63484_disable_screen(SCREEN_WINDOW);
 
     /* ---- 7. Drawing parameter setup via FIFO ---- */
 
