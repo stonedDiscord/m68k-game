@@ -53,7 +53,7 @@ font.h: font.bmp font_bmp
 all: crt font.h bmbinary rom split
 
 # Build the bare metal binary
-bmbinary: $(OBJS) font.h crt
+bmbinary: crt font.h $(OBJS)
 	$(LD) -o $(BUILDDIR)/$@ $(OBJS) $(LFLAGS)
 
 # Release build with optimizations

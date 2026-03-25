@@ -26,7 +26,6 @@
 #include "duart.h"
 #include "audio.h"
 #include "gpu.h"
-#include "font.h" /* font8x8[128][8] */
 #include "pt3player.h"
 #include "rtc.h"
 #include "tk.h"
