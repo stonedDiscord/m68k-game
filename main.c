@@ -197,9 +197,35 @@ int main(void)
 	printf("Testprogramm\n\n");
 	println(" ");
 
-	/* Test 1: RTC */
-	print_string("Test 1 RTC: ");
-	printf("Test 1 RTC: ");
+	/* Test 1: RAMDAC */
+	print_string("Test 1 RAMDAC: ");
+	printf("Test 1 RAMDAC: ");
+	if (*ramdac_mask == 0xFF)
+	{
+		hd63484_enable_screen(SCREEN_BASE, VRAM_UPPER, MEM_WIDTH & 0x03FFu);
+		{
+			uint32_t org_addr = VRAM_UPPER +
+								(uint32_t)(SCREEN_RASTERS - 1) * (uint32_t)MEM_WIDTH;
+			hd63484_set_origin(0x1 /* DN_BASE */, org_addr, 0);
+		}
+
+		hd63484_set_dp(0x1, VRAM_UPPER, 0);
+		hd63484_set_rwp(0x1, VRAM_UPPER);
+		hd63484_set_color_bg(PAL_GREEN);
+		println("OK");
+		printf("OK\n");
+	}
+	else
+	{
+		hd63484_set_color_bg(PAL_RED);
+		println("Nein");
+		printf("Nein\n");
+	}
+	hd63484_set_color_bg(PAL_BLACK);
+
+	/* Test 2: RTC */
+	print_string("Test 2 RTC: ");
+	printf("Test 2 RTC: ");
 	struct tm time_rtc;
 	if (rtc_get_timespec(&time_rtc) == 0)
 	{
@@ -229,9 +255,9 @@ int main(void)
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
-	/* Test 2: TK (Time Keeper) */
-	print_string("Test 2 TK: ");
-	printf("Test 2 TK: ");
+	/* Test 3: TK (Time Keeper) */
+	print_string("Test 3 TK: ");
+	printf("Test 3 TK: ");
 	struct tm time;
 	if (tk_read(&time) == 0)
 	{
@@ -261,9 +287,9 @@ int main(void)
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
-	/* Test 3: DUART */
-	print_string("Test 3 DUART: ");
-	printf("Test 3 DUART (Hallo das bin ich!): ");
+	/* Test 4: DUART */
+	print_string("Test 4 DUART: ");
+	printf("Test 4 DUART (Hallo das bin ich!): ");
 	if (SRB & TxRDY)
 	{
 		hd63484_set_color_bg(PAL_GREEN);
@@ -278,40 +304,14 @@ int main(void)
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
-	/* Test 4: Video */
-	print_string("Test 4 Video (Hallo das bin ich!): ");
-	printf("Test 4 Video: ");
+	/* Test 5: Video */
+	print_string("Test 5 Video (Hallo das bin ich!): ");
+	printf("Test 5 Video: ");
 	if (hd63484_read_sr() & SR_CED)
 	{
 		hd63484_set_color_bg(PAL_GREEN);
 		println("OK");
 		printf("OK\n");
-	}
-	else
-	{
-		hd63484_set_color_bg(PAL_RED);
-		println("Nein");
-		printf("Nein\n");
-	}
-	hd63484_set_color_bg(PAL_BLACK);
-
-	/* Test 5: RAMDAC */
-	print_string("Test 5 RAMDAC: ");
-	printf("Test 5 RAMDAC: ");
-	if (*ramdac_mask == 0xFF)
-	{
-		hd63484_set_color_bg(PAL_GREEN);
-		println("OK");
-		printf("OK\n");
-		hd63484_enable_screen(SCREEN_BASE, VRAM_UPPER, MEM_WIDTH & 0x03FFu);
-		{
-			uint32_t org_addr = VRAM_UPPER +
-								(uint32_t)(SCREEN_RASTERS - 1) * (uint32_t)MEM_WIDTH;
-			hd63484_set_origin(0x1 /* DN_BASE */, org_addr, 0);
-		}
-
-		hd63484_set_dp(0x1, VRAM_UPPER, 0);
-		hd63484_set_rwp(0x1, VRAM_UPPER);
 	}
 	else
 	{
