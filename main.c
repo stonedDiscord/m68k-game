@@ -223,6 +223,19 @@ int main(void)
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
+
+static const struct tm default_time = {
+    .tm_sec  = 30,    // seconds [0, 60]
+    .tm_min  = 46,    // minutes [0, 59]
+    .tm_hour = 8,   // hours [0, 23]
+    .tm_mday = 11,    // day of month [1, 31]
+    .tm_mon  = 8,    // months since January [0, 11]
+    .tm_year = 101,  // years since 1900 (2024 -> 124)
+    .tm_wday = 2,    // day of week [0, 6] (Sunday = 0)
+    .tm_yday = 254,    // day of year [0, 365]
+    .tm_isdst = 0   // daylight saving time unknown
+};
+
 	/* Test 2: RTC */
 	print_string("Test 2 RTC: ");
 	printf("Test 2 RTC: ");
@@ -232,7 +245,7 @@ int main(void)
 		hd63484_set_color_bg(PAL_RED);
 		print_string("Falsch\nSetze RTC: ");
 		printf("Falsch\nSetze RTC: ");
-		//rtc_set(BUILD_DATETIME);
+		rtc_set(&default_time);
 	}
 	if (rtc_get(&time_rtc) == 0)
 	{
@@ -269,7 +282,7 @@ int main(void)
 		hd63484_set_color_bg(PAL_RED);
 		print_string("Falsch\nSetze TK: ");
 		printf("Falsch\nSetze TK: ");
-		//tk_set(BUILD_DATETIME);
+		tk_set(&default_time);
 	}
 	if (tk_get(&time) == 0)
 	{

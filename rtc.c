@@ -54,4 +54,30 @@ int rtc_get(struct tm *t)
 
     return 0;
 }
- 
+
+int rtc_set(const struct tm *t)
+{
+    if (!t) return -1;
+
+    RTC_HOLD_SET();
+    while (RTC_IS_BUSY())
+        ;
+
+    RTC_WRITE(RTC_REG_S10,  t->tm_sec / 10);
+    RTC_WRITE(RTC_REG_S1,   t->tm_sec % 10);
+    RTC_WRITE(RTC_REG_MI10, t->tm_min / 10);
+    RTC_WRITE(RTC_REG_MI1,  t->tm_min % 10);
+    RTC_WRITE(RTC_REG_H10,  t->tm_hour / 10);
+    RTC_WRITE(RTC_REG_H1,   t->tm_hour % 10);
+    RTC_WRITE(RTC_REG_D10,  t->tm_mday / 10);
+    RTC_WRITE(RTC_REG_D1,   t->tm_mday % 10);
+    RTC_WRITE(RTC_REG_MO10, (t->tm_mon + 1) / 10);
+    RTC_WRITE(RTC_REG_MO1,  (t->tm_mon + 1) % 10);
+    RTC_WRITE(RTC_REG_Y10,  (t->tm_year + 1900 - 2000) / 10);
+    RTC_WRITE(RTC_REG_Y1,   (t->tm_year + 1900 - 2000) % 10);
+    RTC_WRITE(RTC_REG_W,    (t->tm_wday + 1) % 7); /* chip: 1-7, tm_wday: 0-6 */
+
+    RTC_HOLD_CLR();
+
+    return 0;
+}

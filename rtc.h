@@ -98,6 +98,7 @@ static volatile uint8_t * const rtc_address = (volatile uint8_t *)RTC_BASE;
 
 /* Read RTC and return POSIX timespec */
 int rtc_get(struct tm *t);
+int rtc_set(const struct tm *t);
 
 /* ---------------------------------------------------------------------------
  * Timing constraints (from datasheet, VDD=5V, Ta=-40..+85°C)
