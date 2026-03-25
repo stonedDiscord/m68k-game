@@ -361,18 +361,28 @@ void hd63484_init(void)
     hd63484_write_ar(REG_RAR0); /* = 0xC0, auto-inc from here */
 
     /* Screen 0 (Upper) */
-    //hd63484_enable_screen(SCREEN_UPPER,VRAM_UPPER,MEM_WIDTH & 0x03FFu);
-    hd63484_disable_screen(SCREEN_UPPER);
+    *hd63484_control = 0x0000; /* RAR0: no raster offset     */
+    *hd63484_control = 0x0000; /* MWR0: 0 (disabled)         */
+    *hd63484_control = 0x0000; /* SAR0H                      */
+    *hd63484_control = 0x0000; /* SAR0L                      */
 
-    /* Screen 1 (Base) - disabled */
-    hd63484_disable_screen(SCREEN_BASE);
+    /* Screen 1 (Base) — active display screen */
+    *hd63484_control = 0x0000;                                  /* RAR1: no raster offset  */
+    *hd63484_control = MEM_WIDTH & 0x03FFu;                     /* MWR1: width (CHR=0)     */
+    *hd63484_control = (uint16_t)((VRAM_LOWER >> 16) & 0x000Fu); /* SAR1H: addr bits 19–16 */
+    *hd63484_control = (uint16_t)(VRAM_LOWER & 0xFFFFu);         /* SAR1L: addr bits 15–0   */
 
-    /* Screen 2 (Lower) */
-    hd63484_enable_screen(SCREEN_LOWER,VRAM_LOWER,MEM_WIDTH & 0x03FFu);
-    //hd63484_disable_screen(SCREEN_LOWER);
+    /* Screen 2 (Lower) — disabled, all zero */
+    *hd63484_control = 0x0000; /* RAR2 */
+    *hd63484_control = 0x0000; /* MWR2 */
+    *hd63484_control = 0x0000; /* SAR2H */
+    *hd63484_control = 0x0000; /* SAR2L */
 
-    /* Screen 3 (Window) - disabled, all zero */
-    hd63484_disable_screen(SCREEN_WINDOW);
+    /* Screen 3 (Window) — disabled, all zero */
+    *hd63484_control = 0x0000; /* RAR3 */
+    *hd63484_control = 0x0000; /* MWR3 */
+    *hd63484_control = 0x0000; /* SAR3H */
+    *hd63484_control = 0x0000; /* SAR3L */
 
     /* ---- 7. Drawing parameter setup via FIFO ---- */
 
