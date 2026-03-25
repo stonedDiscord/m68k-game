@@ -172,8 +172,6 @@ int main(void)
 
 	ramdac_reset();
 
-	hd63484_set_font(font8x8);
-
 	/* 1. Clear to black */
 	hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
 

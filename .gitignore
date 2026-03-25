@@ -67,3 +67,6 @@ snap/
 music_data.c
 music/*.pt3
 roms/
+
+font_bmp
+font.h

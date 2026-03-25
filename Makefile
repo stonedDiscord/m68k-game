@@ -13,6 +13,7 @@ BUILDDIR=build
 ROMDIR=roms
 
 CC=$(PREFIX)-gcc
+HOST_CC=gcc
 LD=$(PREFIX)-ld
 OBJCOPY=$(PREFIX)-objcopy
 OBJDUMP=$(PREFIX)-objdump
@@ -38,6 +39,13 @@ DEPS=$(OBJS:.o=.d)
 # Generate music data from PT3 file
 music_data.c: music/track.pt3
 	xxd -i "$<" | sed 's/music_track_pt3/pt3player_main_track_pt3/g' > $@
+
+font_bmp: font_bmp.c
+	$(HOST_CC) -O2 -o font_bmp font_bmp.c
+
+# BMP is source of truth — font.h is derived from it
+font.h: font.bmp font_bmp
+	./font_bmp bmp2h font.bmp font.h
 
 .PHONY: all bmbinary release clean rom split distclean
 

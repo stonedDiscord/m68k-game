@@ -8,6 +8,7 @@
  */
 
 #include "gpu.h"
+#include "font.h"
 #include <stdbool.h>
 
 /* Screen height stored at init time; used by hd63484_sy() for Y-flipping */
@@ -883,25 +884,6 @@ void hd63484_draw_line(int16_t x0, int16_t y0,
     hd63484_aline(x1, y1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 }
 
-/* ===========================================================================
- * Text rendering
- * ===========================================================================*/
-
-static const uint8_t (*hd63484_font)[8] = 0;
-
-void hd63484_set_font(const uint8_t (*font)[8])
-{
-    hd63484_font = font;
-}
-
-unsigned char reverse(unsigned char b)
-{
-    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-    return b;
-}
-
 /*
  * hd63484_draw_char – draw one 8×8 character at screen position (sx, sy).
  *
@@ -918,37 +900,18 @@ unsigned char reverse(unsigned char b)
 void hd63484_draw_char(int16_t sx, int16_t sy, char c,
                        uint8_t fg, uint8_t bg)
 {
-    uint16_t pram[16];
-    uint8_t row;
-    const uint8_t *glyph;
+    static int16_t last_c  = -1;
+    static uint8_t last_fg = 0xFF, last_bg = 0xFF;
 
-    if (!hd63484_font)
-        return;
-    if ((uint8_t)c >= 128)
-        c = '?';
+    if ((uint8_t)c >= 128) c = '?';
 
-    glyph = hd63484_font[(uint8_t)c];
+    if ((int16_t)(uint8_t)c != last_c) {
+        hd63484_wptn(0, 8, font8x8[(uint8_t)c]);
+        last_c = (int16_t)(uint8_t)c;
+    }
+    if (fg != last_fg) { hd63484_set_color1(fg); last_fg = fg; }
+    if (bg != last_bg) { hd63484_set_color0(bg); last_bg = bg; }
 
-    /* Load glyph rows into pattern RAM reversed so PTN (which advances
-     * in chip-Y-up direction) draws the top row of the glyph at the top
-     * of the cell on screen.
-     * Rows 8–15 are zeroed (unused — cell is only 8 rows tall). */
-    for (row = 0; row < 8; row++)
-        pram[row] = (uint16_t)reverse(glyph[7 - row]); /* reverse: row 7 first */
-    for (row = 8; row < 16; row++)
-        pram[row] = 0x0000;
-
-    hd63484_wptn(0, 16, pram);
-
-    /* PRC: 8×8 area (pex=7, pey=7), no zoom */
-    hd63484_wpr(PR_PRC0, 0x0000u);
-    hd63484_wpr(PR_PRC1, 0x0000u);
-    hd63484_wpr(PR_PRC2, 0x7070u); /* PEY=7, PZY=0, PEX=7, PZX=0 */
-
-    hd63484_set_color0(bg);
-    hd63484_set_color1(fg);
-
-    /* amove to bottom-left of the 8-row cell (chip Y-up: row sy+7 is lowest) */
     hd63484_amove(sx, sy + 7);
     hd63484_ptn(7, 7, 0, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 }
