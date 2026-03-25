@@ -313,27 +313,27 @@ void hd63484_init(void)
      */
     hd63484_write_ar(REG_RAR0); /* = 0xC0, auto-inc from here */
 
-    /* Screen 0 (Upper) — disabled, all zero */
+    /* Screen 0 (Upper) */
+    *hd63484_control = 0x0000;                                   /* RAR0: no raster offset */
+    *hd63484_control = MEM_WIDTH & 0x03FFu;                      /* MWR0: width (CHR=0)    */
+    *hd63484_control = (uint16_t)((VRAM_UPPER >> 16) & 0x000Fu); /* SAR0H: addr bits 19–16 */
+    *hd63484_control = (uint16_t)(VRAM_UPPER & 0xFFFFu);         /* SAR0L: addr bits 15–0  */
+
+    /* Screen 1 (Base) - disabled */
     *hd63484_control = 0x0000; /* RAR0: no raster offset     */
     *hd63484_control = 0x0000; /* MWR0: 0 (disabled)         */
     *hd63484_control = 0x0000; /* SAR0H                      */
     *hd63484_control = 0x0000; /* SAR0L                      */
 
-    /* Screen 1 (Base) — active display screen */
-    *hd63484_control = 0x0000;                                  /* RAR1: no raster offset  */
-    *hd63484_control = MEM_WIDTH & 0x03FFu;                     /* MWR1: width (CHR=0)     */
-    *hd63484_control = (uint16_t)((VRAM_BASE >> 16) & 0x000Fu); /* SAR1H: addr bits 19–16 */
-    *hd63484_control = (uint16_t)(VRAM_BASE & 0xFFFFu);         /* SAR1L: addr bits 15–0   */
+    /* Screen 2 (Lower) */
+    *hd63484_control = 0x0000;                                   /* RAR2: no raster offset */
+    *hd63484_control = MEM_WIDTH & 0x03FFu;                      /* MWR2: width (CHR=0)    */
+    *hd63484_control = (uint16_t)((VRAM_LOWER >> 16) & 0x000Fu); /* SAR2H: addr bits 19–16 */
+    *hd63484_control = (uint16_t)(VRAM_LOWER & 0xFFFFu);         /* SAR2L: addr bits 15–0  */
 
-    /* Screen 2 (Lower) — disabled, all zero */
-    *hd63484_control = 0x0000; /* RAR2 */
-    *hd63484_control = 0x0000; /* MWR2 */
-    *hd63484_control = 0x0000; /* SAR2H */
-    *hd63484_control = 0x0000; /* SAR2L */
-
-    /* Screen 3 (Window) — disabled, all zero */
-    *hd63484_control = 0x0000; /* RAR3 */
-    *hd63484_control = 0x0000; /* MWR3 */
+    /* Screen 3 (Window) - disabled, all zero */
+    *hd63484_control = 0x0000; /* RAR3  */
+    *hd63484_control = 0x0000; /* MWR3  */
     *hd63484_control = 0x0000; /* SAR3H */
     *hd63484_control = 0x0000; /* SAR3L */
 
@@ -360,14 +360,14 @@ void hd63484_init(void)
      * Or use the convenience wrapper hd63484_screen_y() defined in gpu.h.
      */
     {
-        uint32_t org_addr = VRAM_BASE +
+        uint32_t org_addr = VRAM_LOWER +
                             (uint32_t)(SCREEN_RASTERS - 1) * (uint32_t)MEM_WIDTH;
         hd63484_set_origin(0x1 /* DN_BASE */, org_addr, 0);
     }
 
-    /* Drawing pointer: base screen, starting at VRAM_BASE */
-    hd63484_set_dp(0x1, VRAM_BASE, 0);
-    hd63484_set_rwp(0x1, VRAM_BASE);
+    /* Drawing pointer: base screen, starting at VRAM_LOWER */
+    hd63484_set_dp(0x1, VRAM_LOWER, 0);
+    hd63484_set_rwp(0x1, VRAM_LOWER);
 
     /* Solid white pattern, replace mode */
     hd63484_set_solid_pattern();

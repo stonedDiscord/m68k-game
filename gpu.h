@@ -367,7 +367,8 @@ extern volatile uint16_t *hd63484_control;  /* RS=1 : data / FIFO        */
 #define SCREEN_RASTERS 280
 
 #define MEM_WIDTH       96
-#define VRAM_BASE   0x00000UL
+#define VRAM_LOWER   0x00000UL
+#define VRAM_UPPER   0x80000UL
 
 /* ---------------------------------------------------------------------------
  * Public API
