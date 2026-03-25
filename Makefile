@@ -50,10 +50,10 @@ font.h: font.bmp font_bmp
 .PHONY: all bmbinary release clean rom split distclean
 
 # Default target: build everything
-all: crt bmbinary rom split
+all: crt font.h bmbinary rom split
 
 # Build the bare metal binary
-bmbinary: $(OBJS) crt
+bmbinary: $(OBJS) font.h crt
 	$(LD) -o $(BUILDDIR)/$@ $(OBJS) $(LFLAGS)
 
 # Release build with optimizations
