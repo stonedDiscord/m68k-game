@@ -142,8 +142,8 @@ void display_all_inputs()
 {
 	scan_inputs();
 
-	hd63484_set_color0(PAL_WHITE);
-	hd63484_set_color1(PAL_BLACK);
+	hd63484_set_color_bg(PAL_BLACK);
+	hd63484_set_color_fg(PAL_WHITE);
 
 	for (int n = 0; n < 8; n++)
 	{
@@ -179,7 +179,8 @@ int main(void)
 	hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
 
 	/* 2. White border */
-	hd63484_set_color1(PAL_WHITE);
+	hd63484_set_color_bg(PAL_BLACK);
+	hd63484_set_color_fg(PAL_WHITE);
 	hd63484_amove(0, 0);
 	hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 
@@ -190,7 +191,8 @@ int main(void)
 	setup_duart();
 
 	/* Text on a coloured background */
-	stringbg = PAL_BLACK;
+	hd63484_set_color_bg(PAL_BLACK);
+	hd63484_set_color_fg(PAL_WHITE);
 	println("Testprogramm:");
 	printf("Testprogramm\n\n");
 	println(" ");
@@ -201,7 +203,7 @@ int main(void)
 	struct tm time_rtc;
 	if (rtc_get_timespec(&time_rtc) == 0)
 	{
-		stringbg = PAL_GREEN;
+		hd63484_set_color_bg(PAL_GREEN);
 		char datum[32];
 		sprintf(datum, "%04d-%02d-%02d %02d:%02d:%02d",
 				time_rtc.tm_year + 1900,
@@ -221,11 +223,11 @@ int main(void)
 	}
 	else
 	{
-		stringbg = PAL_RED;
+		hd63484_set_color_bg(PAL_RED);
 		println("Fehler");
 		printf("Fehler\n");
 	}
-	stringbg = PAL_BLACK;
+	hd63484_set_color_bg(PAL_BLACK);
 
 	/* Test 2: TK (Time Keeper) */
 	print_string("Test 2 TK: ");
@@ -233,7 +235,7 @@ int main(void)
 	struct tm time;
 	if (tk_read(&time) == 0)
 	{
-		stringbg = PAL_GREEN;
+		hd63484_set_color_bg(PAL_GREEN);
 		char datum[32];
 		sprintf(datum, "%04d-%02d-%02d %02d:%02d:%02d",
 				time.tm_year + 1900,
@@ -253,62 +255,62 @@ int main(void)
 	}
 	else
 	{
-		stringbg = PAL_RED;
+		hd63484_set_color_bg(PAL_RED);
 		println("Fehler");
 		printf("Fehler\n");
 	}
-	stringbg = PAL_BLACK;
+	hd63484_set_color_bg(PAL_BLACK);
 
 	/* Test 3: DUART */
 	print_string("Test 3 DUART: ");
 	printf("Test 3 DUART (Hallo das bin ich!): ");
 	if (SRB & TxRDY)
 	{
-		stringbg = PAL_GREEN;
+		hd63484_set_color_bg(PAL_GREEN);
 		println("OK");
 		printf("OK\n");
 	}
 	else
 	{
-		stringbg = PAL_RED;
+		hd63484_set_color_bg(PAL_RED);
 		println("Fehler");
 		printf("Fehler\n");
 	}
-	stringbg = PAL_BLACK;
+	hd63484_set_color_bg(PAL_BLACK);
 
 	/* Test 4: Video */
 	print_string("Test 4 Video (Hallo das bin ich!): ");
 	printf("Test 4 Video: ");
 	if (hd63484_read_sr() & SR_CED)
 	{
-		stringbg = PAL_GREEN;
+		hd63484_set_color_bg(PAL_GREEN);
 		println("OK");
 		printf("OK\n");
 	}
 	else
 	{
-		stringbg = PAL_RED;
+		hd63484_set_color_bg(PAL_RED);
 		println("Fehler");
 		printf("Fehler\n");
 	}
-	stringbg = PAL_BLACK;
+	hd63484_set_color_bg(PAL_BLACK);
 
 	/* Test 5: RAMDAC */
 	print_string("Test 5 RAMDAC: ");
 	printf("Test 5 RAMDAC: ");
 	if (false)
 	{
-		stringbg = PAL_GREEN;
+		hd63484_set_color_bg(PAL_GREEN);
 		println("OK");
 		printf("OK\n");
 	}
 	else
 	{
-		stringbg = PAL_RED;
+		hd63484_set_color_bg(PAL_RED);
 		println("Fehler");
 		printf("Fehler\n");
 	}
-	stringbg = PAL_BLACK;
+	hd63484_set_color_bg(PAL_BLACK);
 
 	/* Test 6: RAM */
 	print_string("Test 6 RAM: ");
@@ -317,17 +319,17 @@ int main(void)
 	*ramtest_addr = 0x1234;
 	if (*ramtest_addr == 0x1234)
 	{
-		stringbg = PAL_GREEN;
+		hd63484_set_color_bg(PAL_GREEN);
 		println("OK");
 		printf("OK\n");
 	}
 	else
 	{
-		stringbg = PAL_RED;
+		hd63484_set_color_bg(PAL_RED);
 		println("Fehler");
 		printf("Fehler\n");
 	}
-	stringbg = PAL_BLACK;
+	hd63484_set_color_bg(PAL_BLACK);
 
 	enable_interrupts();
 
@@ -347,7 +349,7 @@ int main(void)
 		uint16_t radius = 10 + (anim_frame % 31);
 		
 		/* Kreis zeichnen */
-		hd63484_set_color0(anim_frame % 0x0Fu);
+		hd63484_set_color_bg(anim_frame % 0x0Fu);
 		hd63484_amove(center_x, center_y);
 		hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 		

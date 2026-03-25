@@ -506,12 +506,12 @@ void hd63484_set_origin(uint8_t dn, uint32_t addr, uint8_t dot)
     fifo_w(opl);
 }
 
-void hd63484_set_color0(uint8_t color)
+void hd63484_set_color_bg(uint8_t color)
 {
     hd63484_wpr(PR_CL0, hd63484_color_reg(color));
 }
 
-void hd63484_set_color1(uint8_t color)
+void hd63484_set_color_fg(uint8_t color)
 {
     hd63484_wpr(PR_CL1, hd63484_color_reg(color));
 }
@@ -724,7 +724,7 @@ void hd63484_paint(int stop_at_edge,
      * CL0 is set to 0xFFFF here so it never matches any valid 4bpp pixel,
      * disabling the secondary boundary. If CL0 were left at 0 (black) it would
      * stop the fill immediately when scanning the black background. */
-    hd63484_set_color0(0xFF);
+    hd63484_set_color_bg(0xFF);
 
     /* Bit 8 of PAINT opcode: E=0 stops at EDG color, E=1 stops at non-EDG */
     uint16_t op = CMD_PAINT | draw_flags(area, col, opm);
@@ -847,8 +847,8 @@ void hd63484_aplg(uint8_t n, const int16_t *xy,
  */
 void hd63484_clear_screen(uint8_t color, int16_t w, int16_t h)
 {
-    hd63484_set_color0(0x0);
-    hd63484_set_color1(color);
+    hd63484_set_color_bg(0x0);
+    hd63484_set_color_fg(color);
     hd63484_set_solid_pattern();
     hd63484_amove(0, h - 1);                                      /* screen bottom-left */
     hd63484_afrct(w - 1, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE); /* to top-right */
@@ -862,8 +862,8 @@ void hd63484_fill_rect(int16_t x, int16_t y,
                        int16_t w, int16_t h,
                        uint8_t color)
 {
-    hd63484_set_color0(0x0);
-    hd63484_set_color1(color);
+    hd63484_set_color_bg(0x0);
+    hd63484_set_color_fg(color);
     hd63484_set_solid_pattern();
     hd63484_amove(x, y + h - 1);                                      /* screen bottom-left of rect */
     hd63484_afrct(x + w - 1, y, AREA_NONE, COL_REG_IND, OPM_REPLACE); /* top-right */
@@ -876,8 +876,8 @@ void hd63484_draw_line(int16_t x0, int16_t y0,
                        int16_t x1, int16_t y1,
                        uint8_t color)
 {
-    hd63484_set_color0(0x0);
-    hd63484_set_color1(color);
+    hd63484_set_color_bg(0x0);
+    hd63484_set_color_fg(color);
     hd63484_set_solid_pattern();
     hd63484_amove(x0, y0);
     hd63484_aline(x1, y1, AREA_NONE, COL_REG_IND, OPM_REPLACE);

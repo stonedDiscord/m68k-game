@@ -439,8 +439,8 @@ static inline uint16_t hd63484_color_reg(uint8_t index)
 }
 
 /* Colour setup – pass a 4-bit palette index; nibble replication is automatic */
-void     hd63484_set_color0(uint8_t color);
-void     hd63484_set_color1(uint8_t color);
+void     hd63484_set_color_bg(uint8_t color);
+void     hd63484_set_color_fg(uint8_t color);
 void     hd63484_set_edge_color(uint8_t color);
 void     hd63484_set_mask(uint16_t mask);          /* raw bitmask, not a color */
 void     hd63484_set_compare_color(uint8_t color);
