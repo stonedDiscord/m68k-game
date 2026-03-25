@@ -29,6 +29,10 @@
 extern volatile uint16_t *hd63484_addr;     /* RS=0 : write=AR, read=SR */
 extern volatile uint16_t *hd63484_control;  /* RS=1 : data / FIFO        */
 
+extern volatile uint8_t *ramdac_index;
+extern volatile uint8_t *ramdac_palette;
+extern volatile uint8_t *ramdac_mask;
+
 /* ---------------------------------------------------------------------------
  * Status Register (SR) bit masks  – read from RS=0
  * ---------------------------------------------------------------------------*/

@@ -224,8 +224,8 @@ int main(void)
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		println("Fehler");
-		printf("Fehler\n");
+		println("Nein");
+		printf("Nein\n");
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
@@ -256,8 +256,8 @@ int main(void)
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		println("Fehler");
-		printf("Fehler\n");
+		println("Nein");
+		printf("Nein\n");
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
@@ -273,8 +273,8 @@ int main(void)
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		println("Fehler");
-		printf("Fehler\n");
+		println("Nein");
+		printf("Nein\n");
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
@@ -290,15 +290,15 @@ int main(void)
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		println("Fehler");
-		printf("Fehler\n");
+		println("Nein");
+		printf("Nein\n");
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
 	/* Test 5: RAMDAC */
 	print_string("Test 5 RAMDAC: ");
 	printf("Test 5 RAMDAC: ");
-	if (false)
+	if (*ramdac_mask == 0xFF)
 	{
 		hd63484_set_color_bg(PAL_GREEN);
 		println("OK");
@@ -307,8 +307,8 @@ int main(void)
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		println("Fehler");
-		printf("Fehler\n");
+		println("Nein");
+		printf("Nein\n");
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
@@ -326,8 +326,8 @@ int main(void)
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		println("Fehler");
-		printf("Fehler\n");
+		println("Nein");
+		printf("Nein\n");
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
