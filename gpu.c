@@ -947,13 +947,13 @@ void print_string(const char *str)
             stringx = 8;
         } else {
             hd63484_draw_char(stringx, stringy, *str, stringfg, stringbg);
-            if ((stringx += 8) >= HTOTAL-8) { stringx = 8; advance_y = true; }
+            if ((stringx += 8) >= SCREEN_W-8) { stringx = 8; advance_y = true; }
         }
 
         if (advance_y) {
             advance_y = false;
             stringy = stringy + 8;
-            if (stringy >= VTOTAL-8) stringy = 8;
+            if (stringy >= SCREEN_H-8) stringy = 8;
         }
 
         str++;
