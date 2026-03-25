@@ -361,13 +361,15 @@ void hd63484_init(void)
     hd63484_write_ar(REG_RAR0); /* = 0xC0, auto-inc from here */
 
     /* Screen 0 (Upper) */
-    hd63484_enable_screen(SCREEN_UPPER,VRAM_UPPER,MEM_WIDTH & 0x03FFu);
+    //hd63484_enable_screen(SCREEN_UPPER,VRAM_UPPER,MEM_WIDTH & 0x03FFu);
+    hd63484_disable_screen(SCREEN_UPPER);
 
     /* Screen 1 (Base) - disabled */
     hd63484_disable_screen(SCREEN_BASE);
 
     /* Screen 2 (Lower) */
     hd63484_enable_screen(SCREEN_LOWER,VRAM_LOWER,MEM_WIDTH & 0x03FFu);
+    //hd63484_disable_screen(SCREEN_LOWER);
 
     /* Screen 3 (Window) - disabled, all zero */
     hd63484_disable_screen(SCREEN_WINDOW);
