@@ -896,11 +896,9 @@ void hd63484_draw_line(int16_t x0, int16_t y0,
  * cell (chip y = sy(sy+7)) and fills upward.  We reverse the row order
  * when loading the pattern RAM so the glyph appears upright on screen.
  */
-void hd63484_draw_char(int16_t sx, int16_t sy, char c,
-                       uint8_t fg, uint8_t bg)
+void hd63484_draw_char(int16_t sx, int16_t sy, char c)
 {
     static int16_t last_c  = -1;
-    static uint8_t last_fg = 0xFF, last_bg = 0xFF;
 
     if ((uint8_t)c >= 128) c = '?';
 
@@ -908,8 +906,6 @@ void hd63484_draw_char(int16_t sx, int16_t sy, char c,
         hd63484_wptn(0, 8, font8x8[(uint8_t)c]);
         last_c = (int16_t)(uint8_t)c;
     }
-    if (fg != last_fg) { hd63484_set_color1(fg); last_fg = fg; }
-    if (bg != last_bg) { hd63484_set_color0(bg); last_bg = bg; }
 
     hd63484_amove(sx, sy + 7);
     hd63484_ptn(7, 7, 0, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
@@ -920,12 +916,11 @@ void hd63484_draw_char(int16_t sx, int16_t sy, char c,
  * Advances 8 pixels per character.  Stops at end of string or if the
  * next character would start beyond the right edge of the screen.
  */
-void hd63484_draw_string(int16_t sx, int16_t sy, const char *str,
-                         uint8_t fg, uint8_t bg)
+void hd63484_draw_string(int16_t sx, int16_t sy, const char *str)
 {
     while (*str)
     {
-        hd63484_draw_char(sx, sy, *str, fg, bg);
+        hd63484_draw_char(sx, sy, *str);
         sx += 8;
         str++;
     }
@@ -946,7 +941,7 @@ void print_string(const char *str)
         } else if (*str == '\r') {
             stringx = 8;
         } else {
-            hd63484_draw_char(stringx, stringy, *str, stringfg, stringbg);
+            hd63484_draw_char(stringx, stringy, *str);
             if ((stringx += 8) >= SCREEN_W-8) { stringx = 8; advance_y = true; }
         }
 

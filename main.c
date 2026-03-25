@@ -142,21 +142,25 @@ void display_all_inputs()
 {
 	scan_inputs();
 
+	hd63484_set_color0(PAL_WHITE);
+	hd63484_set_color1(PAL_BLACK);
+
 	for (int n = 0; n < 8; n++)
 	{
 		uint16_t input_state = read_input(n);
 		// Draw label "Input n: 0xXXXX"
 		char label[20];
 		sprintf(label, "Input %d: 0x%04X", n, input_state);
-		hd63484_draw_string(8, 180 + n * 10, label, PAL_WHITE, PAL_BLACK);
+		hd63484_draw_string(8, 180 + n * 10, label);
 	}
 	char hex_str[5];
-	hd63484_draw_string(150, 180, "YM2149A", PAL_WHITE, PAL_BLACK);
+
+	hd63484_draw_string(150, 180, "YM2149A");
 	sprintf(hex_str, "%04X", read_ioa());
-	hd63484_draw_string(220, 180, hex_str, PAL_WHITE, PAL_BLACK);
-	hd63484_draw_string(150, 190, "YM2149B", PAL_WHITE, PAL_BLACK);
+	hd63484_draw_string(220, 180, hex_str);
+	hd63484_draw_string(150, 190, "YM2149B");
 	sprintf(hex_str, "%04X", read_iob());
-	hd63484_draw_string(220, 190, hex_str, PAL_WHITE, PAL_BLACK);
+	hd63484_draw_string(220, 190, hex_str);
 }
 
 void dump_input(uint8_t n)
@@ -440,7 +444,7 @@ int main(void)
 		if (counter >= 30000)
 		{
 			// Change the text color after 30000 iterations
-			hd63484_draw_string(8, 8, "Das waren 30000 Umdrehungen.", PAL_YELLOW, PAL_BLUE);
+			hd63484_draw_string(8, 8, "Das waren 30000 Umdrehungen.");
 			counter = 0;
 		}
 	} while (counter < 60000);

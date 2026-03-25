@@ -553,10 +553,8 @@ extern uint16_t stringx;
 extern uint16_t stringy;
 
 void hd63484_set_font(const uint8_t (*font)[8]);
-void hd63484_draw_char  (int16_t sx, int16_t sy, char c,
-                          uint8_t fg, uint8_t bg);
-void hd63484_draw_string(int16_t sx, int16_t sy, const char *str,
-                          uint8_t fg, uint8_t bg);
+void hd63484_draw_char  (int16_t sx, int16_t sy, char c);
+void hd63484_draw_string(int16_t sx, int16_t sy, const char *str);
 
 void print_string(const char *str);
 void println(const char *str);
