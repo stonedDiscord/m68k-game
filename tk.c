@@ -1,7 +1,7 @@
 #include "tk.h"
 
-/* --------------------------------------------------------------------------- tk_read() – matches observed firmware behaviour:   - no R-bit halt before reading (firmware doesn't do it either)   - clears control register to 0 after reading (as seen in disassembly) --------------------------------------------------------------------------- */
-int tk_read(struct tm *t)
+/* --------------------------------------------------------------------------- tk_get() – matches observed firmware behaviour:   - no R-bit halt before reading (firmware doesn't do it either)   - clears control register to 0 after reading (as seen in disassembly) --------------------------------------------------------------------------- */
+int tk_get(struct tm *t)
 {
     if (!t) return -1;
 
@@ -35,7 +35,7 @@ int tk_read(struct tm *t)
 }
 
 /* --------------------------------------------------------------------------- tk_write() – uses W-bit handshake per datasheet section 3.2 --------------------------------------------------------------------------- */
-int tk_write(const struct tm *t)
+int tk_set(const struct tm *t)
 {
     if (!t) return -1;
 

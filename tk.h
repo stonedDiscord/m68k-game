@@ -70,7 +70,7 @@
 #define TK_BCD_TO_BIN(b)    ( ((b) >> 4) * 10u + ((b) & 0x0Fu) )
 #define TK_BIN_TO_BCD(n)    ( (((n) / 10u) << 4) | ((n) % 10u) )
 
-int tk_read(struct tm *t);
-int tk_write(const struct tm *t);
+int tk_get(struct tm *t);
+int tk_set(const struct tm *t);
 
 #endif /* TK_H */

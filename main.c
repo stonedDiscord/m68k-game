@@ -227,7 +227,14 @@ int main(void)
 	print_string("Test 2 RTC: ");
 	printf("Test 2 RTC: ");
 	struct tm time_rtc;
-	if (rtc_get_timespec(&time_rtc) == 0)
+	if (rtc_get(&time_rtc)!= 0)
+	{
+		hd63484_set_color_bg(PAL_RED);
+		print_string("Falsch\nSetze RTC: ");
+		printf("Falsch\nSetze RTC: ");
+		//rtc_set(BUILD_DATETIME);
+	}
+	if (rtc_get(&time_rtc) == 0)
 	{
 		hd63484_set_color_bg(PAL_GREEN);
 		print_string("OK\n");
@@ -236,8 +243,8 @@ int main(void)
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		print_string("Nein\n");
-		printf("Nein\n");
+		print_string("Falsch\n");
+		printf("Falsch\n");
 	}
 	{
 	char datum[32];
@@ -257,7 +264,14 @@ int main(void)
 	print_string("Test 3 TK: ");
 	printf("Test 3 TK: ");
 	struct tm time;
-	if (tk_read(&time) == 0)
+	if (tk_get(&time) != 0)
+	{
+		hd63484_set_color_bg(PAL_RED);
+		print_string("Falsch\nSetze TK: ");
+		printf("Falsch\nSetze TK: ");
+		//tk_set(BUILD_DATETIME);
+	}
+	if (tk_get(&time) == 0)
 	{
 		hd63484_set_color_bg(PAL_GREEN);
 		print_string("OK\n");
@@ -266,8 +280,8 @@ int main(void)
 	else
 	{
 		hd63484_set_color_bg(PAL_RED);
-		print_string("Nein\n");
-		printf("Nein\n");
+		print_string("Falsch\n");
+		printf("Falsch\n");
 	}
 	{
 	char datum[32];
@@ -318,8 +332,8 @@ int main(void)
 	hd63484_set_color_bg(PAL_BLACK);
 
 	/* Test 6: RAM */
-	print_string("Test 6 Erweiterter RAM: ");
-	printf("Test 6 Erweiterter RAM: ");
+	print_string("Test 6 SRAM: ");
+	printf("Test 6 SRAM: ");
 	volatile uint16_t *ramtest_addr = (volatile uint16_t *)0xfc0080;
 	*ramtest_addr = 0x1234;
 	if (*ramtest_addr == 0x1234)
@@ -367,7 +381,7 @@ int main(void)
 		case 'K':
 		case 'k':
 			struct tm time;
-			tk_read(&time);
+			tk_get(&time);
 			printf("Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
 				   time.tm_year + 1900,
 				   time.tm_mon + 1,

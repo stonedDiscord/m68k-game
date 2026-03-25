@@ -9,7 +9,7 @@ static inline int bcd(uint8_t tens, uint8_t units)
     return (int)tens * 10 + (int)units;
 }
 
-int rtc_get_timespec(struct tm *t)
+int rtc_get(struct tm *t)
 {
     if (!t) return -1;
 
