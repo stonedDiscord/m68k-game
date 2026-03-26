@@ -164,6 +164,68 @@ void dump_input(uint8_t n)
 	printf("Input %d: 0x%04X", n, input_state);
 }
 
+void gesicht_bg()
+{
+	hd63484_set_color_bg(PAL_BWHITE);
+	hd63484_set_color_fg(PAL_BWHITE);
+	hd63484_set_edge_color(PAL_BWHITE);
+	hd63484_amove(320,64);
+	hd63484_crcl(32, 0, AREA_NONE, COL_DIRECT, OPM_REPLACE);
+	hd63484_set_edge_color(PAL_BWHITE);
+    hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+}
+
+void sonne()
+{
+	const char sternenfarben = PAL_BYELLOW;
+	hd63484_draw_line(330,1,331,26,sternenfarben);
+	hd63484_draw_line(331,26,348,11,sternenfarben);
+	hd63484_draw_line(348,11,341,37,sternenfarben);
+	hd63484_draw_line(341,37,369,25,sternenfarben);
+	hd63484_draw_line(369,25,351,49,sternenfarben);
+	hd63484_draw_line(351,49,381,50,sternenfarben);
+	hd63484_draw_line(381,50,354,69,sternenfarben);
+	hd63484_draw_line(354,69,378,78,sternenfarben);
+	hd63484_draw_line(378,78,353,78,sternenfarben);
+	hd63484_draw_line(353,78,364,107,sternenfarben);
+	hd63484_draw_line(364,107,340,91,sternenfarben);
+	hd63484_draw_line(340,91,342,123,sternenfarben);
+	hd63484_draw_line(342,123,325,102,sternenfarben);
+	hd63484_draw_line(325,102,318,122,sternenfarben);
+	hd63484_draw_line(318,122,311,102,sternenfarben);
+	hd63484_draw_line(311,102,294,121,sternenfarben);
+	hd63484_draw_line(294,121,299,91,sternenfarben);
+	hd63484_draw_line(299,91,271,105,sternenfarben);
+	hd63484_draw_line(271,106,289,82,sternenfarben);
+	hd63484_draw_line(289,82,261,84,sternenfarben);
+	hd63484_draw_line(261,84,282,72,sternenfarben);
+	hd63484_draw_line(282,72,257,63,sternenfarben);
+	hd63484_draw_line(257,63,286,57,sternenfarben);
+	hd63484_draw_line(286,57,265,36,sternenfarben);
+	hd63484_draw_line(265,36,288,41,sternenfarben);
+	hd63484_draw_line(288,41,277,15,sternenfarben);
+	hd63484_draw_line(277,15,302,33,sternenfarben);
+	hd63484_draw_line(302,33,300,6,sternenfarben);
+	hd63484_draw_line(300,6,315,28,sternenfarben);
+	hd63484_draw_line(315,28,330,1,sternenfarben);
+
+	hd63484_amove(340,25);
+	hd63484_set_color_fg(sternenfarben);
+	hd63484_set_edge_color(sternenfarben);
+    hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+}
+
+void gesicht()
+{
+	hd63484_set_color_bg(PAL_BLACK);
+	hd63484_set_edge_color(PAL_BLACK);
+	hd63484_amove(298, 59);
+	hd63484_elps(10, 10, 5, 10, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+	hd63484_amove(335, 60);
+	hd63484_elps(10, 10, 5, 10, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+
+}
+
 int main(void)
 {
 	hd63484_init();
@@ -181,7 +243,6 @@ int main(void)
 
 	/* 4. Cyan diagonal line */
 	hd63484_draw_line(0, 0, SCREEN_W - 1, SCREEN_H - 1, PAL_CYAN);
-	hd63484_draw_line(0, SCREEN_H - 1, SCREEN_W - 1, 0, PAL_MAGENTA);
 
 	setup_duart();
 
@@ -365,63 +426,21 @@ static const struct tm default_time = {
 
 	uint16_t counter = 0;
 
-	/* Animation: springende Kreise in der Mitte des Bildschirms */
-	int16_t center_x = SCREEN_W / 2; /* 192 */
-	int16_t center_y = SCREEN_H / 2; /* 140 */
 	uint8_t anim_frame = 0;
 
-	hd63484_draw_line(330,1,331,26,PAL_YELLOW);
-	hd63484_draw_line(331,26,348,11,PAL_YELLOW);
-	hd63484_draw_line(348,11,341,37,PAL_YELLOW);
-	hd63484_draw_line(341,37,369,25,PAL_YELLOW);
-	hd63484_draw_line(369,25,351,49,PAL_YELLOW);
-	hd63484_draw_line(351,49,381,50,PAL_YELLOW);
-	hd63484_draw_line(381,50,354,69,PAL_YELLOW);
-	hd63484_draw_line(354,69,378,78,PAL_YELLOW);
-	hd63484_draw_line(378,78,353,78,PAL_YELLOW);
-	hd63484_draw_line(353,78,364,107,PAL_YELLOW);
-	hd63484_draw_line(364,107,340,91,PAL_YELLOW);
-	hd63484_draw_line(340,91,342,123,PAL_YELLOW);
-	hd63484_draw_line(342,123,325,102,PAL_YELLOW);
-	hd63484_draw_line(325,102,318,122,PAL_YELLOW);
-	hd63484_draw_line(318,122,311,102,PAL_YELLOW);
-	hd63484_draw_line(311,102,294,121,PAL_YELLOW);
-	hd63484_draw_line(294,121,299,91,PAL_YELLOW);
-	hd63484_draw_line(299,91,271,105,PAL_YELLOW);
-	hd63484_draw_line(271,106,289,82,PAL_YELLOW);
-	hd63484_draw_line(289,82,261,84,PAL_YELLOW);
-	hd63484_draw_line(261,84,282,72,PAL_YELLOW);
-	hd63484_draw_line(282,72,257,63,PAL_YELLOW);
-	hd63484_draw_line(257,63,286,57,PAL_YELLOW);
-	hd63484_draw_line(286,57,265,36,PAL_YELLOW);
-	hd63484_draw_line(265,36,288,41,PAL_YELLOW);
-	hd63484_draw_line(288,41,277,15,PAL_YELLOW);
-	hd63484_draw_line(277,15,302,33,PAL_YELLOW);
-	hd63484_draw_line(302,33,300,6,PAL_YELLOW);
-	hd63484_draw_line(300,6,315,28,PAL_YELLOW);
-	hd63484_draw_line(315,28,330,1,PAL_YELLOW);
-	hd63484_amove(328,11);
-	hd63484_set_edge_color(PAL_YELLOW);
-    hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-
-	hd63484_set_color_bg(PAL_WHITE);
-	hd63484_set_color_fg(PAL_WHITE);
-	hd63484_set_edge_color(PAL_WHITE);
-	hd63484_amove(320,64);
-	hd63484_crcl(31, 1, AREA_NONE, COL_DIRECT, OPM_REPLACE);
-	hd63484_crcl(32, 0, AREA_NONE, COL_DIRECT, OPM_REPLACE);
-	hd63484_set_edge_color(PAL_WHITE);
-    //hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+	gesicht_bg();
+	sonne();
+	//gesicht();
 
 	do
 	{
 		/* Animation: pulsierender Kreis in der Mitte */
-		uint16_t radius = 10 + (anim_frame % 31);
+		uint16_t radius = 1 + (anim_frame % 30);
 
 		/* Kreis zeichnen */
-		hd63484_set_color_bg(anim_frame % 0x0Fu);
-		hd63484_amove(center_x, center_y);
-		hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+		//hd63484_set_color_bg(PAL_BWHITE);
+		//hd63484_amove(320,64);
+		//hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 
 		anim_frame++;
 		if (anim_frame >= 60)
