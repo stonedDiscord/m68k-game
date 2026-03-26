@@ -926,8 +926,6 @@ void hd63484_draw_string(int16_t sx, int16_t sy, const char *str)
     }
 }
 
-uint8_t stringfg = PAL_WHITE;
-uint8_t stringbg = PAL_GREEN;
 uint16_t stringx = 8;
 uint16_t stringy = 8;
 
