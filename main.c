@@ -458,7 +458,6 @@ static const struct tm default_time = {
 			else if (rec_a_buffer != 0)
 			{
 				char buf[2] = {rec_a_buffer, '\0'};
-				stringbg = PAL_BLACK;
 				print_string(buf);
 			}
 			break;
