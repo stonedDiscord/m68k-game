@@ -1,5 +1,5 @@
 /*
- * example.c – HD63484 usage example
+ * main.c – Profitech 3000 Homebrew
  *
  * Configured to match the ADP/Merkur arcade hardware as emulated in MAME
  * (adp.cpp driver: quickjac, skattv, skattva, fashiong etc.)
@@ -16,11 +16,6 @@
  *   Display height = SP1 rasters = 280
  *   Memory width   = 384 px / 4 px per word = 96 words per line
  *
- * Palette (ADP hardware RGB formula, from adp.cpp adp_palette()):
- *   r = 0xB8 * bit(i,0) + 0x47 * bit(i,3)
- *   g = 0xB8 * bit(i,1) + 0x47 * bit(i,3)
- *   b = 0xB8 * bit(i,2) + 0x47 * bit(i,3)
- *   -> 4-bit IRGB palette (bit3=intensity, bits2-0=RGB)
  */
 
 #include "duart.h"

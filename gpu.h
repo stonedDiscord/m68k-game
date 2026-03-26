@@ -551,8 +551,6 @@ void     hd63484_draw_line(int16_t x0, int16_t y0,
  * would extend beyond (SCREEN_W-1, SCREEN_H-1).
  * ---------------------------------------------------------------------------*/
 
-extern uint8_t stringfg;
-extern uint8_t stringbg;
 extern uint16_t stringx;
 extern uint16_t stringy;
 
