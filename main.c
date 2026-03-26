@@ -370,6 +370,11 @@ static const struct tm default_time = {
 	int16_t center_y = SCREEN_H / 2; /* 140 */
 	uint8_t anim_frame = 0;
 
+	hd63484_set_color_bg(PAL_WHITE);
+	hd63484_set_color_fg(PAL_WHITE);
+	hd63484_amove(320,64);
+	hd63484_crcl(32, 0, AREA_NONE, COL_DIRECT, OPM_REPLACE);
+
 	do
 	{
 		/* Animation: pulsierender Kreis in der Mitte */
