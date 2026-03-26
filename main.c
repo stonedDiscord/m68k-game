@@ -532,10 +532,15 @@ static const struct tm default_time = {
 		{
 			display_all_inputs();
 		}
-		if (counter >= 30000)
+		if (counter >= 10000)
 		{
-			// Change the text color after 30000 iterations
-			hd63484_draw_string(8, 8, "Das waren 30000 Umdrehungen.");
+			// Change the text color after 10000 iterations
+			hd63484_set_color_bg(PAL_BLUE);
+			hd63484_set_color_fg(PAL_WHITE);
+			hd63484_draw_string(counter % 320, counter % 240, "lain");
+		}
+		if (counter >= 60000)
+		{
 			counter = 0;
 		}
 	} while (counter < 60000);
