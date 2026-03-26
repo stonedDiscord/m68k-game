@@ -37,6 +37,22 @@ extern unsigned int pt3player_main_track_pt3_len;
 char rec_a_buffer = 0;
 char rec_b_buffer = 0;
 
+/* Simple xorshift32 PRNG */
+static uint32_t prng_state = 1;
+
+static uint32_t prng_next(void) {
+    uint32_t x = prng_state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    prng_state = x;
+    return x;
+}
+
+static void prng_seed(uint32_t seed) {
+    prng_state = seed;
+}
+
 /* =========================================================================
  * ISR – placed at the vector address by the linker script (platform.ld).
  *
@@ -226,26 +242,8 @@ void gesicht()
 
 }
 
-int main(void)
+void run_tests()
 {
-	hd63484_init();
-
-	ramdac_reset();
-
-	/* 1. Clear to black */
-	hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
-
-	/* 2. White border */
-	hd63484_set_color_bg(PAL_BLACK);
-	hd63484_set_color_fg(PAL_WHITE);
-	hd63484_amove(0, 0);
-	hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-
-	/* 4. Cyan diagonal line */
-	hd63484_draw_line(0, 0, SCREEN_W - 1, SCREEN_H - 1, PAL_CYAN);
-
-	setup_duart();
-
 	/* Text on a coloured background */
 	hd63484_set_color_bg(PAL_BLACK);
 	hd63484_set_color_fg(PAL_WHITE);
@@ -418,11 +416,44 @@ static const struct tm default_time = {
 		printf("Nein\n");
 	}
 	hd63484_set_color_bg(PAL_BLACK);
+}
+
+int main(void)
+{
+	hd63484_init();
+
+	ramdac_reset();
+
+	/* 1. Clear to black */
+	hd63484_clear_screen(PAL_BLACK, SCREEN_W, SCREEN_H);
+
+	/* 2. White border */
+	hd63484_set_color_bg(PAL_BLACK);
+	hd63484_set_color_fg(PAL_WHITE);
+	hd63484_amove(0, 0);
+	hd63484_arct(SCREEN_W - 1, SCREEN_H - 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+
+	/* 4. Cyan diagonal line */
+	hd63484_draw_line(0, 0, SCREEN_W - 1, SCREEN_H - 1, PAL_CYAN);
+
+	setup_duart();
+
+	run_tests();
 
 	enable_interrupts();
 
 	/* Initialize PT3 player */
 	func_setup_music(pt3player_main_track_pt3, pt3player_main_track_pt3_len, 0, 0);
+
+	/* Seed PRNG with current time */
+	struct tm seed_time;
+	if (tk_get(&seed_time) == 0) {
+		uint32_t seed = (seed_time.tm_sec + 1) * (seed_time.tm_min + 1) *
+		               (seed_time.tm_hour + 1) * (seed_time.tm_mday + 1);
+		prng_seed(seed);
+	} else {
+		prng_seed(timer_ticks ^ 0xDEADBEEF);
+	}
 
 	uint16_t counter = 0;
 
@@ -532,12 +563,21 @@ static const struct tm default_time = {
 		{
 			display_all_inputs();
 		}
-		if (counter >= 10000)
+		if (counter >= 10000 && counter < 20000 && counter % 10 == 0)
 		{
-			// Change the text color after 10000 iterations
 			hd63484_set_color_bg(PAL_BLUE);
 			hd63484_set_color_fg(PAL_WHITE);
-			hd63484_draw_string(counter % 320, counter % 240, "lain");
+			uint16_t x = prng_next() % SCREEN_W;
+			uint16_t y = prng_next() % SCREEN_H;
+			hd63484_draw_string(x, y, "lain");
+		}
+		if (counter == 40000)
+		{
+			gesicht_bg();
+			sonne();
+			stringx=0;
+			stringy=0;
+			run_tests();
 		}
 		if (counter >= 60000)
 		{
