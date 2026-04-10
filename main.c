@@ -40,17 +40,19 @@ char rec_b_buffer = 0;
 /* Simple xorshift32 PRNG */
 static uint32_t prng_state = 1;
 
-static uint32_t prng_next(void) {
-    uint32_t x = prng_state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    prng_state = x;
-    return x;
+static uint32_t prng_next(void)
+{
+	uint32_t x = prng_state;
+	x ^= x << 13;
+	x ^= x >> 17;
+	x ^= x << 5;
+	prng_state = x;
+	return x;
 }
 
-static void prng_seed(uint32_t seed) {
-    prng_state = seed;
+static void prng_seed(uint32_t seed)
+{
+	prng_state = seed;
 }
 
 /* =========================================================================
@@ -185,50 +187,50 @@ void gesicht_bg()
 	hd63484_set_color_bg(PAL_BWHITE);
 	hd63484_set_color_fg(PAL_BWHITE);
 	hd63484_set_edge_color(PAL_BWHITE);
-	hd63484_amove(320,64);
+	hd63484_amove(320, 64);
 	hd63484_crcl(32, 0, AREA_NONE, COL_DIRECT, OPM_REPLACE);
 	hd63484_set_edge_color(PAL_BWHITE);
-    hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+	hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 }
 
 void sonne()
 {
 	const char sternenfarben = PAL_BYELLOW;
-	hd63484_draw_line(330,1,331,26,sternenfarben);
-	hd63484_draw_line(331,26,348,11,sternenfarben);
-	hd63484_draw_line(348,11,341,37,sternenfarben);
-	hd63484_draw_line(341,37,369,25,sternenfarben);
-	hd63484_draw_line(369,25,351,49,sternenfarben);
-	hd63484_draw_line(351,49,381,50,sternenfarben);
-	hd63484_draw_line(381,50,354,69,sternenfarben);
-	hd63484_draw_line(354,69,378,78,sternenfarben);
-	hd63484_draw_line(378,78,353,78,sternenfarben);
-	hd63484_draw_line(353,78,364,107,sternenfarben);
-	hd63484_draw_line(364,107,340,91,sternenfarben);
-	hd63484_draw_line(340,91,342,123,sternenfarben);
-	hd63484_draw_line(342,123,325,102,sternenfarben);
-	hd63484_draw_line(325,102,318,122,sternenfarben);
-	hd63484_draw_line(318,122,311,102,sternenfarben);
-	hd63484_draw_line(311,102,294,121,sternenfarben);
-	hd63484_draw_line(294,121,299,91,sternenfarben);
-	hd63484_draw_line(299,91,271,105,sternenfarben);
-	hd63484_draw_line(271,106,289,82,sternenfarben);
-	hd63484_draw_line(289,82,261,84,sternenfarben);
-	hd63484_draw_line(261,84,282,72,sternenfarben);
-	hd63484_draw_line(282,72,257,63,sternenfarben);
-	hd63484_draw_line(257,63,286,57,sternenfarben);
-	hd63484_draw_line(286,57,265,36,sternenfarben);
-	hd63484_draw_line(265,36,288,41,sternenfarben);
-	hd63484_draw_line(288,41,277,15,sternenfarben);
-	hd63484_draw_line(277,15,302,33,sternenfarben);
-	hd63484_draw_line(302,33,300,6,sternenfarben);
-	hd63484_draw_line(300,6,315,28,sternenfarben);
-	hd63484_draw_line(315,28,330,1,sternenfarben);
+	hd63484_draw_line(330, 1, 331, 26, sternenfarben);
+	hd63484_draw_line(331, 26, 348, 11, sternenfarben);
+	hd63484_draw_line(348, 11, 341, 37, sternenfarben);
+	hd63484_draw_line(341, 37, 369, 25, sternenfarben);
+	hd63484_draw_line(369, 25, 351, 49, sternenfarben);
+	hd63484_draw_line(351, 49, 381, 50, sternenfarben);
+	hd63484_draw_line(381, 50, 354, 69, sternenfarben);
+	hd63484_draw_line(354, 69, 378, 78, sternenfarben);
+	hd63484_draw_line(378, 78, 353, 78, sternenfarben);
+	hd63484_draw_line(353, 78, 364, 107, sternenfarben);
+	hd63484_draw_line(364, 107, 340, 91, sternenfarben);
+	hd63484_draw_line(340, 91, 342, 123, sternenfarben);
+	hd63484_draw_line(342, 123, 325, 102, sternenfarben);
+	hd63484_draw_line(325, 102, 318, 122, sternenfarben);
+	hd63484_draw_line(318, 122, 311, 102, sternenfarben);
+	hd63484_draw_line(311, 102, 294, 121, sternenfarben);
+	hd63484_draw_line(294, 121, 299, 91, sternenfarben);
+	hd63484_draw_line(299, 91, 271, 105, sternenfarben);
+	hd63484_draw_line(271, 106, 289, 82, sternenfarben);
+	hd63484_draw_line(289, 82, 261, 84, sternenfarben);
+	hd63484_draw_line(261, 84, 282, 72, sternenfarben);
+	hd63484_draw_line(282, 72, 257, 63, sternenfarben);
+	hd63484_draw_line(257, 63, 286, 57, sternenfarben);
+	hd63484_draw_line(286, 57, 265, 36, sternenfarben);
+	hd63484_draw_line(265, 36, 288, 41, sternenfarben);
+	hd63484_draw_line(288, 41, 277, 15, sternenfarben);
+	hd63484_draw_line(277, 15, 302, 33, sternenfarben);
+	hd63484_draw_line(302, 33, 300, 6, sternenfarben);
+	hd63484_draw_line(300, 6, 315, 28, sternenfarben);
+	hd63484_draw_line(315, 28, 330, 1, sternenfarben);
 
-	hd63484_amove(340,25);
+	hd63484_amove(340, 25);
 	hd63484_set_color_fg(sternenfarben);
 	hd63484_set_edge_color(sternenfarben);
-    hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
+	hd63484_paint(1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 }
 
 void gesicht()
@@ -239,7 +241,6 @@ void gesicht()
 	hd63484_elps(10, 10, 5, 10, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
 	hd63484_amove(335, 60);
 	hd63484_elps(10, 10, 5, 10, 0, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-
 }
 
 void run_tests()
@@ -277,24 +278,23 @@ void run_tests()
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
-
-static const struct tm default_time = {
-    .tm_sec  = 30,    // seconds [0, 60]
-    .tm_min  = 46,    // minutes [0, 59]
-    .tm_hour = 8,   // hours [0, 23]
-    .tm_mday = 11,    // day of month [1, 31]
-    .tm_mon  = 8,    // months since January [0, 11]
-    .tm_year = 101,  // years since 1900 (2024 -> 124)
-    .tm_wday = 2,    // day of week [0, 6] (Sunday = 0)
-    .tm_yday = 254,    // day of year [0, 365]
-    .tm_isdst = 0   // daylight saving time unknown
-};
+	static const struct tm default_time = {
+		.tm_sec = 30,	// seconds [0, 60]
+		.tm_min = 46,	// minutes [0, 59]
+		.tm_hour = 8,	// hours [0, 23]
+		.tm_mday = 11,	// day of month [1, 31]
+		.tm_mon = 8,	// months since January [0, 11]
+		.tm_year = 101, // years since 1900 (2024 -> 124)
+		.tm_wday = 2,	// day of week [0, 6] (Sunday = 0)
+		.tm_yday = 254, // day of year [0, 365]
+		.tm_isdst = 0	// daylight saving time unknown
+	};
 
 	/* Test 2: RTC */
 	print_string("Test 2 RTC: ");
 	printf("Test 2 RTC: ");
 	struct tm time_rtc;
-	if (rtc_get(&time_rtc)!= 0)
+	if (rtc_get(&time_rtc) != 0)
 	{
 		hd63484_set_color_bg(PAL_RED);
 		print_string("Falsch\nSetze RTC: ");
@@ -314,16 +314,16 @@ static const struct tm default_time = {
 		printf("Falsch\n");
 	}
 	{
-	char datum[32];
-	sprintf(datum, "Datum %04d-%02d-%02d\nZeit %02d:%02d:%02d\n",
-			time_rtc.tm_year + 1900,
-			time_rtc.tm_mon + 1,
-			time_rtc.tm_mday,
-			time_rtc.tm_hour,
-			time_rtc.tm_min,
-			time_rtc.tm_sec);
-	print_string(datum);
-	printf(datum);
+		char datum[32];
+		sprintf(datum, "Datum %04d-%02d-%02d\nZeit %02d:%02d:%02d\n",
+				time_rtc.tm_year + 1900,
+				time_rtc.tm_mon + 1,
+				time_rtc.tm_mday,
+				time_rtc.tm_hour,
+				time_rtc.tm_min,
+				time_rtc.tm_sec);
+		print_string(datum);
+		printf(datum);
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
@@ -351,16 +351,16 @@ static const struct tm default_time = {
 		printf("Falsch\n");
 	}
 	{
-	char datum[32];
-	sprintf(datum, "Datum %04d-%02d-%02d\nZeit %02d:%02d:%02d\n",
-			time.tm_year + 1900,
-			time.tm_mon + 1,
-			time.tm_mday,
-			time.tm_hour,
-			time.tm_min,
-			time.tm_sec);
-	print_string(datum);
-	printf(datum);
+		char datum[32];
+		sprintf(datum, "Datum %04d-%02d-%02d\nZeit %02d:%02d:%02d\n",
+				time.tm_year + 1900,
+				time.tm_mon + 1,
+				time.tm_mday,
+				time.tm_hour,
+				time.tm_min,
+				time.tm_sec);
+		print_string(datum);
+		printf(datum);
 	}
 	hd63484_set_color_bg(PAL_BLACK);
 
@@ -447,11 +447,14 @@ int main(void)
 
 	/* Seed PRNG with current time */
 	struct tm seed_time;
-	if (tk_get(&seed_time) == 0) {
+	if (tk_get(&seed_time) == 0)
+	{
 		uint32_t seed = (seed_time.tm_sec + 1) * (seed_time.tm_min + 1) *
-		               (seed_time.tm_hour + 1) * (seed_time.tm_mday + 1);
+						(seed_time.tm_hour + 1) * (seed_time.tm_mday + 1);
 		prng_seed(seed);
-	} else {
+	}
+	else
+	{
 		prng_seed(timer_ticks ^ 0xDEADBEEF);
 	}
 
@@ -461,22 +464,10 @@ int main(void)
 
 	gesicht_bg();
 	sonne();
-	//gesicht();
+	// gesicht();
 
 	do
 	{
-		/* Animation: pulsierender Kreis in der Mitte */
-		uint16_t radius = 1 + (anim_frame % 30);
-
-		/* Kreis zeichnen */
-		//hd63484_set_color_bg(PAL_BWHITE);
-		//hd63484_amove(320,64);
-		//hd63484_crcl(radius, 1, AREA_NONE, COL_REG_IND, OPM_REPLACE);
-
-		anim_frame++;
-		if (anim_frame >= 60)
-			anim_frame = 0;
-
 		switch (rec_a_buffer)
 		{
 		case 'K':
@@ -563,6 +554,17 @@ int main(void)
 		{
 			display_all_inputs();
 		}
+		if (counter == 5000)
+		{
+			print_string("Test IPv7: ");
+			printf("Test IPv7: ");
+			{
+				hd63484_set_color_bg(PAL_RED);
+				println("Nein");
+				printf("Nein\n");
+			}
+			hd63484_set_color_bg(PAL_BLACK);
+		}
 		if (counter >= 10000 && counter < 20000 && counter % 10 == 0)
 		{
 			hd63484_set_color_bg(PAL_BLUE);
@@ -571,12 +573,39 @@ int main(void)
 			uint16_t y = prng_next() % SCREEN_H;
 			hd63484_draw_string(x, y, "lain");
 		}
-		if (counter == 40000)
+		if (counter == 21000)
+		{
+			print_string("Test 8 Wired: ");
+			printf("Test 8 Wired: ");
+			{
+				hd63484_set_color_bg(PAL_GREEN);
+				println("OK");
+				printf("OK\n");
+			}
+			hd63484_set_color_bg(PAL_BLACK);
+		}
+		if (counter == 30000)
+		{
+			{
+				print_string("Test 9 Lain: ");
+				printf("Test 9 Lain: ");
+				{
+					hd63484_set_color_bg(PAL_RED);
+					println("Nein");
+					printf("Nein\n");
+				}
+				hd63484_set_color_bg(PAL_BLACK);
+			}
+		}
+		if (counter == 35000)
 		{
 			gesicht_bg();
 			sonne();
-			stringx=0;
-			stringy=0;
+		}
+		if (counter >= 40000)
+		{
+			stringx = 0;
+			stringy = 0;
 			run_tests();
 		}
 		if (counter >= 60000)
