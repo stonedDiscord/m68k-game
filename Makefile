@@ -158,18 +158,15 @@ burn: split
 
 testr: funlddlxzip
 	cp $(ROMDIR)/funlddlx.zip /run/media/stoned/schrott/Roms/mame/roms/
-	cd /run/media/stoned/schrott/msys64/src/mame/
-	/run/media/stoned/schrott/msys64/src/mame/mame funlddlx -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window
+	mame funlddlx -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window
 
 test: skattvzip
 	cp $(ROMDIR)/skattv.zip /run/media/stoned/schrott/Roms/mame/roms/
-	cd /run/media/stoned/schrott/msys64/src/mame/
-	/run/media/stoned/schrott/msys64/src/mame/mame skattv -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window -debug
+	mame skattv -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window -debug
 
 testn: moneyf1zip
 	cp $(ROMDIR)/moneyf1.zip /run/media/stoned/schrott/Roms/mame/roms/
-	cd /run/media/stoned/schrott/msys64/src/mame/
-	/run/media/stoned/schrott/msys64/src/mame/mame moneyf1 -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window -debug
+	mame moneyf1 -rompath /run/media/stoned/schrott/Roms/mame/roms/ -window -debug
 
 
 # Clean build artifacts
