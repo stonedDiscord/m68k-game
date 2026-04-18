@@ -52,7 +52,7 @@ void setup_duart(void)
      * square-wave cycle), so the actual interrupt period is:
      *   2 * preload / clock = 10 ms  (as calculated above)
      * ----------------------------------------------------------------- */
-    ct_set_timer(CT_PRELOAD_MS(20));    /* 10 ms periodic interrupt */
+    ct_set_timer(CT_PRELOAD_MS(25));    /* 10 ms periodic interrupt */
 
     /* Start the timer BEFORE enabling channel clocks (datasheet recommendation) */
     ct_start();
