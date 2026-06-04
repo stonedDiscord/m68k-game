@@ -438,6 +438,8 @@ int main(void)
 
 	setup_duart();
 
+	OPR_SET = 0x04; // knack
+
 	run_tests();
 
 	enable_interrupts();

@@ -111,14 +111,14 @@ funlddlxzip: funlddlx
 
 moneyf1: split
 	cd $(ROMDIR) && \
-	cp rom.1.u2.bin m27c1001_money_f1_ic1 && \
-	cp rom.2.u6.bin m27c1001_money_f1_ic2 && \
-	truncate --size=128K m27c1001_money_f1_ic1 && \
-	truncate --size=128K m27c1001_money_f1_ic2
+	cp rom.1.u2.bin m27c1001_money_f1_i.u2 && \
+	cp rom.2.u6.bin m27c1001_money_f1_ii.u6 && \
+	truncate --size=128K m27c1001_money_f1_i.u2 && \
+	truncate --size=128K m27c1001_money_f1_ii.u6
 
 moneyf1zip: moneyf1
 	cd $(ROMDIR) && \
-	zip moneyf1.zip m27c1001_money_f1_ic1 m27c1001_money_f1_ic2
+	zip moneyf1.zip m27c1001_money_f1_i.u2 m27c1001_money_f1_ii.u6
 
 skattva: split
 	cd $(ROMDIR) && \
