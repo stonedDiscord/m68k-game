@@ -10,9 +10,15 @@ jobs:
     - uses: actions/checkout@v6
     - name: Build
       run: |
-        make skattv
+        make skattva
     - name: Upload artifact
       uses: actions/upload-artifact@v6
       with:
-        name: skattv
+        name: skattva
         path: roms/f*.bin
+
+    - name: Update release
+      uses: softprops/action-gh-release@v3
+      with:
+        tag_name: release
+        files: roms/s*.bin
