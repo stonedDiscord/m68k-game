@@ -6,11 +6,19 @@ CPU=68000
 
 # Cross-compiler prefix
 # Use m68k-linux-gnu for Linux, m68k-eabi-elf for other systems
-PREFIX=m68k-eabi-elf
+PREFIX=m68k-elf
 
 # Build configuration
 BUILDDIR=build
 ROMDIR=roms
+
+# Keep builds for machines without a video board separate from video builds.
+HEADLESS ?= 0
+ifeq ($(HEADLESS),1)
+SRCS:=$(subst gpu.c,gpu_headless.c,$(SRCS))
+BUILDDIR=build/headless
+ROMDIR=roms/headless
+endif
 
 CC=$(PREFIX)-gcc
 HOST_CC=gcc
@@ -29,6 +37,7 @@ endif
 endif
 
 CFLAGS=-m$(CPU) -Wall -Wextra -g -static -I${m68kbm_PATH}/include -I. -msoft-float -MMD -MP -O -std=c17
+CFLAGS+= -DHEADLESS=$(HEADLESS)
 LFLAGS=--script=platform.ld -L${m68kbm_PATH}/libmetal -lmetal-$(CPU)
 
 OBJS=$(patsubst %.c,$(BUILDDIR)/%.c.o,$(SRCS))
@@ -47,7 +56,7 @@ font_bmp: font_bmp.c
 font.h: font.bmp font_bmp
 	./font_bmp bmp2h font.bmp font.h
 
-.PHONY: all bmbinary release clean rom split distclean
+.PHONY: all bmbinary release clean rom split distclean sus
 
 # Default target: build everything
 all: crt font.h bmbinary rom split
@@ -119,6 +128,12 @@ moneyf1: split
 moneyf1zip: moneyf1
 	cd $(ROMDIR) && \
 	zip moneyf1.zip m27c1001_money_f1_i.u2 m27c1001_money_f1_ii.u6
+
+# SuS with W27E040 EPROMs: repeat each padded 128 KiB bank four times.
+sus: moneyf1
+	cd $(ROMDIR) && \
+	cat m27c1001_money_f1_i.u2 m27c1001_money_f1_i.u2 m27c1001_money_f1_i.u2 m27c1001_money_f1_i.u2 > sus.u2.bin && \
+	cat m27c1001_money_f1_ii.u6 m27c1001_money_f1_ii.u6 m27c1001_money_f1_ii.u6 m27c1001_money_f1_ii.u6 > sus.u6.bin
 
 skattva: split
 	cd $(ROMDIR) && \
