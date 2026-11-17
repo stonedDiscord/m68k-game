@@ -67,11 +67,19 @@ static uint32_t timer_ticks = 0;
 
 void handle_timer(void)
 {
+	static uint8_t music_ticks;
+
+	/* Refresh one lamp row per millisecond, independently of video work. */
+	lamp_test_tick();
+	if (++music_ticks < 25)
+		return;
+	music_ticks = 0;
+	/* Preserve the player's existing 25 ms cadence. */
 	func_play_tick(0);
 	audio_update_pt3();
 	timer_ticks++;
 	if (timer_ticks >= 50)
-	{ /* 50 * 10 ms = 500 ms */
+		{ /* 50 * 25 ms = 1.25 s */
 		timer_ticks = 0;
 		OPR_CLR = 0x60; /* Deassert both OP5 and OP6 (both LEDs off) */
 		if (swapper)
