@@ -561,6 +561,7 @@ void hd63484_draw_string(int16_t sx, int16_t sy, const char *str);
 void print_string(const char *str);
 void println(const char *str);
 
+uint8_t ramdac_read_mask(void);
 void ramdac_reset(void);
 
 #endif /* GPU_H */

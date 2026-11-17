@@ -959,6 +959,11 @@ void println(const char *str)
     print_string("\n");
 }
 
+uint8_t ramdac_read_mask(void)
+{
+    return *ramdac_mask;
+}
+
 void ramdac_reset(void)
 {
     volatile uint8_t i;
