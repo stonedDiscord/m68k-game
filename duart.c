@@ -5,7 +5,7 @@
  * setup_duart
  *
  * Initialises both UART channels to 9600 8N1 and configures the
- * counter/timer for a 10 ms periodic interrupt.
+ * counter/timer for a 1 ms periodic interrupt (lamp matrix refresh).
  *
  * Interrupt sources enabled by default:
  *   - Channel A receiver ready  (IMR bit 1)
@@ -42,17 +42,17 @@ void setup_duart(void)
     ACR = ACR_BRG_SET1 | ACR_CT_TIMER_X1D16;
 
     /* -----------------------------------------------------------------
-     * Counter / Timer preload for 10 ms tick.
+     * Counter / Timer preload for 1 ms tick.
      *
      *   X1 = 3.6864 MHz  →  X1/16 = 230400 Hz
      *   period = 2 * preload / 230400
-     *   For 10 ms: preload = 0.010 * 230400 / 2 = 1152 = 0x0480
+     *   For 1 ms: preload = 0.001 * 230400 / 2 = 115.2 (rounded down)
      *
      * The timer fires ISR[3] every SECOND countdown (i.e. every full
      * square-wave cycle), so the actual interrupt period is:
-     *   2 * preload / clock = 10 ms  (as calculated above)
+     *   2 * 115 / 230400 = 0.998 ms
      * ----------------------------------------------------------------- */
-    ct_set_timer(CT_PRELOAD_MS(25));    /* 10 ms periodic interrupt */
+    ct_set_timer(CT_PRELOAD_MS(1));     /* 1 ms lamp scan; music divides by 25 */
 
     /* Start the timer BEFORE enabling channel clocks (datasheet recommendation) */
     ct_start();
