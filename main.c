@@ -255,7 +255,7 @@ void run_tests()
 	/* Test 1: RAMDAC */
 	print_string("Test 1 RAMDAC: ");
 	printf("Test 1 RAMDAC: ");
-	if (*ramdac_mask == 0xFF)
+	if (ramdac_read_mask() == 0xFF)
 	{
 		hd63484_enable_screen(SCREEN_BASE, VRAM_UPPER, MEM_WIDTH & 0x03FFu);
 		{
@@ -420,6 +420,14 @@ void run_tests()
 
 int main(void)
 {
+	setup_duart();
+	OPR_SET = 0x04; // knack
+
+	/* The timer ISR uses the player state: initialise it before unmasking IRQs.
+	 * Start audio before any optional video, serial or clock diagnostics. */
+	func_setup_music(pt3player_main_track_pt3, pt3player_main_track_pt3_len, 0, 0);
+	enable_interrupts();
+
 	hd63484_init();
 
 	ramdac_reset();
@@ -436,16 +444,7 @@ int main(void)
 	/* 4. Cyan diagonal line */
 	hd63484_draw_line(0, 0, SCREEN_W - 1, SCREEN_H - 1, PAL_CYAN);
 
-	setup_duart();
-
-	OPR_SET = 0x04; // knack
-
 	run_tests();
-
-	enable_interrupts();
-
-	/* Initialize PT3 player */
-	func_setup_music(pt3player_main_track_pt3, pt3player_main_track_pt3_len, 0, 0);
 
 	/* Seed PRNG with current time */
 	struct tm seed_time;
