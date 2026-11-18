@@ -15,6 +15,7 @@ static volatile uint8_t * const  o2_device = (volatile uint8_t *)0x8000C1;
 
 void scan_inputs(void);
 uint16_t read_input(uint8_t n);
-void lamp_test_tick(void); /* Call every 1 ms; scans both 8 x 12 lamp boards. */
+/* Call every 1 ms; refreshes both lamp boards and the eight panel digits. */
+void output_test_tick(void);
 
 #endif /* INPUT_H */

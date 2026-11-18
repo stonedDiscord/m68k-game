@@ -69,8 +69,8 @@ void handle_timer(void)
 {
 	static uint8_t music_ticks;
 
-	/* Refresh one lamp row per millisecond, independently of video work. */
-	lamp_test_tick();
+	/* Refresh lamps and digits every millisecond, independently of video. */
+	output_test_tick();
 	if (++music_ticks < 20)
 		return;
 	music_ticks = 0;
