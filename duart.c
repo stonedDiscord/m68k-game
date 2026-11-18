@@ -16,12 +16,13 @@
 void setup_duart(void)
 {
     /* -----------------------------------------------------------------
-     * Output port – all general purpose, LEDs on (OP5/OP6 = 0 in OPR
-     * means the pins are driven HIGH which typically means LED off;
-     * OPR_SET writes ones to turn the corresponding OPR bits on, which
-     * drives the pins LOW – active-low LEDs).
+     * Output port – all general purpose, LEDs on. OPR_SET sets latch
+     * bits and drives the corresponding pins LOW; OPR_CLR drives HIGH.
      * OPCR = 0 means OP7-OP2 are all OPR-driven general-purpose outputs.
+     * disc4000.bin clears both audio latch bits during init (0x8d96):
+     * OP0 HIGH disables the alarm bypass, OP2 HIGH is normal sound.
      * ----------------------------------------------------------------- */
+    OPR_CLR = OP_LS_ALARM | OP_LS_KNACK;
     OPCR    = 0x00;
     OPR_SET = 0x60;     /* Assert OP6 and OP5 (LEDs) */
 
@@ -51,8 +52,10 @@ void setup_duart(void)
      * The timer fires ISR[3] every SECOND countdown (i.e. every full
      * square-wave cycle), so the actual interrupt period is:
      *   2 * 115 / 230400 = 0.998 ms
+     * These numbers use the default 3.6864 MHz DUART crystal. The
+     * preload follows DUART_CLOCK_HZ, independently of CPU_MHZ.
      * ----------------------------------------------------------------- */
-    ct_set_timer(CT_PRELOAD_MS(1));     /* 1 ms lamp scan; music divides by 25 */
+    ct_set_timer(CT_PRELOAD_MS(1));     /* 1 ms lamp scan; divide by 20 for 50 Hz music */
 
     /* Start the timer BEFORE enabling channel clocks (datasheet recommendation) */
     ct_start();

@@ -2,6 +2,7 @@
 #define DUART_H
 
 #include <stdint.h>
+#include "board.h"
 
 // MC68681 config
 #define DUART_BASE 0x800181                 /* Base of I/O port addresses */
@@ -203,9 +204,9 @@
  *   preload = 0.010 * 230400 / 2 = 1152 = 0x0480
  *
  * Macro: CT_PRELOAD_MS(ms) – compute preload for a given millisecond period.
- * Assumes X1 = 3.6864 MHz and ACR_CT_TIMER_X1D16 clock source.
+ * Uses the configured DUART oscillator and ACR_CT_TIMER_X1D16.
  * ----------------------------------------------------------------------- */
-#define CT_CLK_HZ           230400UL    /* 3686400 / 16 */
+#define CT_CLK_HZ           (DUART_CLOCK_HZ / 16UL)
 #define CT_PRELOAD_MS(ms)   (((ms) * CT_CLK_HZ) / 2000UL)
 #define CT_PRELOAD_US(us)   (((us) * CT_CLK_HZ) / 2000000UL)
 

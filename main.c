@@ -5,7 +5,7 @@
  * (adp.cpp driver: quickjac, skattv, skattva, fashiong etc.)
  *
  * System specs:
- *   CPU  : 68EC000 @ 8 MHz
+ *   CPU  : 68EC000 @ 8 or 12 MHz (CPU_MHZ build setting)
  *   ACRTC: HD63484, VRAM at 0x00000 in the chip's address space (128KB RAM)
  *   Screen: 384 x 280 total raster, 60 Hz, full visible area
  *   Colors: 4 bits per pixel (16 colours), palette index 0-15
@@ -71,15 +71,15 @@ void handle_timer(void)
 
 	/* Refresh one lamp row per millisecond, independently of video work. */
 	lamp_test_tick();
-	if (++music_ticks < 25)
+	if (++music_ticks < 20)
 		return;
 	music_ticks = 0;
-	/* Preserve the player's existing 25 ms cadence. */
+	/* PT3 playback requires 50 Hz, independent of the CPU oscillator. */
 	func_play_tick(0);
 	audio_update_pt3();
 	timer_ticks++;
 	if (timer_ticks >= 50)
-		{ /* 50 * 25 ms = 1.25 s */
+	{ /* 50 * 20 ms = 1 s */
 		timer_ticks = 0;
 		OPR_CLR = 0x60; /* Deassert both OP5 and OP6 (both LEDs off) */
 		if (swapper)
@@ -258,6 +258,7 @@ void run_tests()
 	hd63484_set_color_fg(PAL_WHITE);
 	println("Testprogramm:");
 	printf("Testprogramm\n\n");
+	printf("SuS CPU: %d MHz\n", CPU_MHZ);
 	println(" ");
 
 	/* Test 1: RAMDAC */
@@ -429,7 +430,6 @@ void run_tests()
 int main(void)
 {
 	setup_duart();
-	OPR_SET = 0x04; // knack
 
 	/* The timer ISR uses the player state: initialise it before unmasking IRQs.
 	 * Start audio before any optional video, serial or clock diagnostics. */

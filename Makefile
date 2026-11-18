@@ -1,4 +1,5 @@
 # Source files to compile
+.DEFAULT_GOAL := all
 SRCS=main.c gpu.c duart.c io.c audio.c pt3player.c rtc.c tk.c music_data.c
 
 # Target CPU architecture
@@ -9,6 +10,13 @@ CPU=68000
 PREFIX=m68k-elf
 
 # Build configuration
+CPU_MHZ ?= 8
+DUART_CLOCK_HZ ?= 3686400
+ifneq ($(CPU_MHZ),8)
+ifneq ($(CPU_MHZ),12)
+$(error CPU_MHZ must be 8 or 12)
+endif
+endif
 BUILDDIR=build
 ROMDIR=roms
 
@@ -18,6 +26,12 @@ ifeq ($(HEADLESS),1)
 SRCS:=$(subst gpu.c,gpu_headless.c,$(SRCS))
 BUILDDIR=build/headless
 ROMDIR=roms/headless
+endif
+
+# Keep CPU variants separate so changing CPU_MHZ never reuses stale objects.
+ifneq ($(CPU_MHZ),8)
+BUILDDIR:=$(BUILDDIR)/$(CPU_MHZ)mhz
+ROMDIR:=$(ROMDIR)/$(CPU_MHZ)mhz
 endif
 
 CC=$(PREFIX)-gcc
@@ -37,13 +51,25 @@ endif
 endif
 
 CFLAGS=-m$(CPU) -Wall -Wextra -g -static -I${m68kbm_PATH}/include -I. -msoft-float -MMD -MP -O -std=c17
-CFLAGS+= -DHEADLESS=$(HEADLESS)
+CFLAGS+= -DHEADLESS=$(HEADLESS) -DCPU_MHZ=$(CPU_MHZ) -DDUART_CLOCK_HZ=$(DUART_CLOCK_HZ)UL
 LFLAGS=--script=platform.ld -L${m68kbm_PATH}/libmetal -lmetal-$(CPU)
 
 OBJS=$(patsubst %.c,$(BUILDDIR)/%.c.o,$(SRCS))
 OBJS:=$(patsubst %.S,$(BUILDDIR)/%.S.o,$(OBJS))
 OBJS:=$(patsubst %.s,$(BUILDDIR)/%.s.o,$(OBJS))
 DEPS=$(OBJS:.o=.d)
+
+# Also rebuild when an oscillator override changes within the same variant.
+.PHONY: FORCE
+FORCE:
+
+$(BUILDDIR)/clock-config: FORCE
+	mkdir -p $(@D)
+	printf '%s\n' 'CPU_MHZ=$(CPU_MHZ)' 'DUART_CLOCK_HZ=$(DUART_CLOCK_HZ)' > $@.tmp
+	cmp -s $@.tmp $@ || cp $@.tmp $@
+	rm -f $@.tmp
+
+$(OBJS): $(BUILDDIR)/clock-config
 
 # Generate music data from PT3 file
 music_data.c: music/track.pt3
