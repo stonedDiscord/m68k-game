@@ -14,6 +14,14 @@
 #define DUART_CLOCK_HZ 3686400UL
 #endif
 
+/* Music level: 0 = mute, 15 = original output. */
+#ifndef AUDIO_VOLUME
+#define AUDIO_VOLUME 6
+#endif
+#if AUDIO_VOLUME < 0 || AUDIO_VOLUME > 15
+#error AUDIO_VOLUME must be between 0 and 15
+#endif
+
 // 68c681 outputs
 #define OP0_LS_ALARM  0x01
 #define OP1_ENSFI     0x02

@@ -12,6 +12,7 @@ PREFIX=m68k-elf
 # Build configuration
 CPU_MHZ ?= 8
 DUART_CLOCK_HZ ?= 3686400
+AUDIO_VOLUME ?= 6
 ifneq ($(CPU_MHZ),8)
 ifneq ($(CPU_MHZ),12)
 $(error CPU_MHZ must be 8 or 12)
@@ -52,6 +53,7 @@ endif
 
 CFLAGS=-m$(CPU) -Wall -Wextra -g -static -I${m68kbm_PATH}/include -I. -msoft-float -MMD -MP -O -std=c17
 CFLAGS+= -DHEADLESS=$(HEADLESS) -DCPU_MHZ=$(CPU_MHZ) -DDUART_CLOCK_HZ=$(DUART_CLOCK_HZ)UL
+CFLAGS+= -DAUDIO_VOLUME=$(AUDIO_VOLUME)
 LFLAGS=--script=platform.ld -L${m68kbm_PATH}/libmetal -lmetal-$(CPU)
 
 OBJS=$(patsubst %.c,$(BUILDDIR)/%.c.o,$(SRCS))
@@ -59,13 +61,13 @@ OBJS:=$(patsubst %.S,$(BUILDDIR)/%.S.o,$(OBJS))
 OBJS:=$(patsubst %.s,$(BUILDDIR)/%.s.o,$(OBJS))
 DEPS=$(OBJS:.o=.d)
 
-# Also rebuild when an oscillator override changes within the same variant.
+# Also rebuild when clock or volume settings change within a variant.
 .PHONY: FORCE
 FORCE:
 
 $(BUILDDIR)/clock-config: FORCE
 	mkdir -p $(@D)
-	printf '%s\n' 'CPU_MHZ=$(CPU_MHZ)' 'DUART_CLOCK_HZ=$(DUART_CLOCK_HZ)' > $@.tmp
+	printf '%s\n' 'CPU_MHZ=$(CPU_MHZ)' 'DUART_CLOCK_HZ=$(DUART_CLOCK_HZ)' 'AUDIO_VOLUME=$(AUDIO_VOLUME)' > $@.tmp
 	cmp -s $@.tmp $@ || cp $@.tmp $@
 	rm -f $@.tmp
 
