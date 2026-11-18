@@ -22,7 +22,7 @@ void setup_duart(void)
      * disc4000.bin clears both audio latch bits during init (0x8d96):
      * OP0 HIGH disables the alarm bypass, OP2 HIGH is normal sound.
      * ----------------------------------------------------------------- */
-    OPR_CLR = OP_LS_ALARM | OP_LS_KNACK;
+    OPR_CLR = OP0_LS_ALARM | OP2_LS_KNACK;
     OPCR    = 0x00;
     OPR_SET = 0x60;     /* Assert OP6 and OP5 (LEDs) */
 
