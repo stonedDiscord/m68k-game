@@ -12,22 +12,15 @@ uint8_t inputs;
  * ENMUX at 0x8000c1. See also stellafr.cpp mux_w/mux2_w/lamps_w.
  * ANZ is latched after each group of eight writes; ENMUX after sixteen.
  * Coin and motor latches stay low. */
-static uint8_t digit_line(uint8_t field, uint8_t segment, uint8_t phase)
+static uint8_t digit_line(uint8_t chain, uint8_t field, uint8_t segment, uint8_t phase)
 {
-    /* Board-order fonts from disc4000.bin, 0x18c16 and 0x18cf6. */
-    static const uint8_t font[2][10] = {
-        { 0x77, 0x41, 0x6e, 0x6b, 0x59, 0x3b, 0x3f, 0x61, 0x7f, 0x7b },
-        { 0xef, 0x89, 0x7d, 0xbd, 0x9b, 0xb7, 0xf7, 0x8d, 0xff, 0xbf }
-    };
-    /* Exercise all eight positions in every field as digits, including
-     * positions that cabinet wiring may use for auxiliary outputs. */
+    /* Raw segment bytes count up modulo 256. Offset every position across
+     * both chains so each output can be identified in the emulator. */
     uint8_t line = 0;
 
     for (uint8_t position = 0; position < 8; position++) {
-        uint8_t value = phase + position;
-        if (value >= 10)
-            value -= 10;
-        if (font[field & 1][value] & ((uint8_t)1 << segment))
+        uint8_t value = phase + chain * 32 + field * 8 + position;
+        if (value & ((uint8_t)1 << segment))
             line |= (uint8_t)0x80 >> position;
     }
     return line;
@@ -36,10 +29,10 @@ static uint8_t digit_line(uint8_t field, uint8_t segment, uint8_t phase)
 void output_test_tick(void)
 {
     enum { LAMP_COLUMNS = 12, LAMP_COUNT = 16 * LAMP_COLUMNS,
-           SNAKE_LENGTH = 8, STEP_MS = 128 };
+           SNAKE_LENGTH = 12, STEP_MS = 128 };
     static uint8_t row = 7;
     static uint8_t cycle;
-    static uint8_t phase = 9;
+    static uint8_t phase = 1;
     static uint8_t elapsed;
     static uint16_t first_lamp;
     uint16_t mux1 = (uint16_t)row << 12;
@@ -60,7 +53,8 @@ void output_test_tick(void)
     uint8_t pos = 7 - row;
     uint8_t field = (cycle << 1) | (pos >> 2);
     uint8_t segment = (pos & 3) * 2;
-    uint8_t line = digit_line(field, segment, phase);
+    uint8_t line1 = digit_line(0, field, segment, phase);
+    uint8_t line2 = digit_line(1, field, segment, phase);
     uint8_t digit_bit = 0x80;
 
     *o2_device = 0;
@@ -70,14 +64,17 @@ void output_test_tick(void)
             data |= 0x20;
         if (mux2 & bit)
             data |= 0x80;
-        if (line & digit_bit)
-            data |= 0x50; /* Same digit animation on ANZ1 and ANZ2. */
+        if (line1 & digit_bit)
+            data |= 0x10;
+        if (line2 & digit_bit)
+            data |= 0x40;
         *io1_device = data;
         digit_bit >>= 1;
         if (bit == 0x0100) {
             *o2_device = 0x50; /* Both ANZ chains, bank 0: even segment line. */
             *o2_device = 0;
-            line = digit_line(field, segment + 1, phase);
+            line1 = digit_line(0, field, segment + 1, phase);
+            line2 = digit_line(1, field, segment + 1, phase);
             digit_bit = 0x80;
         }
     }
@@ -91,7 +88,7 @@ void output_test_tick(void)
         elapsed = 0;
         if (++first_lamp == LAMP_COUNT)
             first_lamp = 0;
-        phase = phase == 0 ? 9 : phase - 1;
+        phase++;
     }
 }
 
