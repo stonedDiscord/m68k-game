@@ -1,4 +1,5 @@
 #include "io.h"
+#include <stdbool.h>
 
 uint8_t io1_in_raw[16];
 uint16_t mux[8];
@@ -17,11 +18,12 @@ static uint8_t digit_line(uint8_t chain, uint8_t field, uint8_t segment, uint8_t
     /* Raw segment bytes count up modulo 256. Offset every position across
      * both chains so each output can be identified in the emulator. */
     uint8_t line = 0;
+    uint8_t mask = (uint8_t)1 << segment;
+    uint8_t value = phase + chain * 32 + field * 8;
 
-    for (uint8_t position = 0; position < 8; position++) {
-        uint8_t value = phase + chain * 32 + field * 8 + position;
-        if (value & ((uint8_t)1 << segment))
-            line |= (uint8_t)0x80 >> position;
+    for (uint8_t bit = 0x80; bit != 0; bit >>= 1, value++) {
+        if (value & mask)
+            line |= bit;
     }
     return line;
 }
@@ -35,20 +37,19 @@ void output_test_tick(void)
     static uint8_t phase = 1;
     static uint8_t elapsed;
     static uint16_t first_lamp;
-    uint16_t mux1 = (uint16_t)row << 12;
-    uint16_t mux2 = mux1;
+    static uint16_t next_lamp = SNAKE_LENGTH;
+    static uint16_t lamp_rows[16];
+    static bool lamps_ready;
 
-    for (uint8_t i = 0; i < SNAKE_LENGTH; i++) {
-        uint16_t lamp = first_lamp + i;
-        if (lamp >= LAMP_COUNT)
-            lamp -= LAMP_COUNT;
-        uint8_t lamp_row = lamp / LAMP_COLUMNS;
-        uint16_t column = (uint16_t)1 << (lamp % LAMP_COLUMNS);
-        if (lamp_row == row)
-            mux1 |= column;
-        if (lamp_row == row + 8)
-            mux2 |= column;
+    /* Keep the snake as row masks instead of rebuilding it with division
+     * and variable shifts on every 1 ms interrupt. */
+    if (!lamps_ready) {
+        for (uint8_t i = 0; i < SNAKE_LENGTH; i++)
+            lamp_rows[i / LAMP_COLUMNS] |= (uint16_t)1 << (i % LAMP_COLUMNS);
+        lamps_ready = true;
     }
+    uint16_t mux1 = ((uint16_t)row << 12) | lamp_rows[row];
+    uint16_t mux2 = ((uint16_t)row << 12) | lamp_rows[row + 8];
 
     uint8_t pos = 7 - row;
     uint8_t field = (cycle << 1) | (pos >> 2);
@@ -86,8 +87,14 @@ void output_test_tick(void)
     row = (row - 1) & 7;
     if (++elapsed == STEP_MS) {
         elapsed = 0;
+        lamp_rows[first_lamp / LAMP_COLUMNS] &=
+            ~((uint16_t)1 << (first_lamp % LAMP_COLUMNS));
+        lamp_rows[next_lamp / LAMP_COLUMNS] |=
+            (uint16_t)1 << (next_lamp % LAMP_COLUMNS);
         if (++first_lamp == LAMP_COUNT)
             first_lamp = 0;
+        if (++next_lamp == LAMP_COUNT)
+            next_lamp = 0;
         phase++;
     }
 }
