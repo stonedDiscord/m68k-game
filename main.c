@@ -37,6 +37,105 @@ extern unsigned int pt3player_main_track_pt3_len;
 char rec_a_buffer = 0;
 char rec_b_buffer = 0;
 
+/* ISR producer, main-loop consumer; byte indices wrap at 256. */
+static volatile char serial_rx[256];
+static volatile uint8_t serial_rx_head;
+static volatile uint8_t serial_rx_tail;
+static volatile bool serial_rx_overflow;
+
+static char memory_command;
+static char memory_args[32];
+static uint8_t memory_args_length;
+static bool memory_args_overflow;
+
+static void serial_memory_start(char command)
+{
+	memory_command = command;
+	memory_args_length = 0;
+	memory_args_overflow = false;
+}
+
+/* Read an unsigned hex argument, rejecting signs, overflow and junk. */
+static bool serial_hex(const char **text, uint32_t limit, uint32_t *value)
+{
+	const char *p = *text;
+	uint32_t number = 0;
+	bool have_digit = false;
+	while (*p == ' ' || *p == '\t')
+		p++;
+	if (p[0] == '0' && (p[1] == 'x' || p[1] == 'X'))
+		p += 2;
+	while (*p && *p != ' ' && *p != '\t')
+	{
+		unsigned digit;
+		if (*p >= '0' && *p <= '9')
+			digit = *p - '0';
+		else if (*p >= 'a' && *p <= 'f')
+			digit = *p - 'a' + 10;
+		else if (*p >= 'A' && *p <= 'F')
+			digit = *p - 'A' + 10;
+		else
+			return false;
+		if (number > (limit - digit) / 16)
+			return false;
+		number = number * 16 + digit;
+		have_digit = true;
+		p++;
+	}
+	while (*p == ' ' || *p == '\t')
+		p++;
+	*text = p;
+	*value = number;
+	return have_digit;
+}
+
+/* Consume arguments without blocking the display or timer-driven music. */
+static bool serial_memory_input(char c)
+{
+	if (!memory_command)
+		return false;
+	if (c == '\033')
+	{
+		memory_command = 0;
+		return true;
+	}
+	if (c == '\r' || c == '\n')
+	{
+		uint32_t address, value = 0;
+		const char *args = memory_args;
+		char command = memory_command;
+		memory_command = 0;
+		memory_args[memory_args_length] = '\0';
+		if (memory_args_overflow ||
+			!serial_hex(&args, 0xffffff, &address) ||
+			(command == 'w' && !serial_hex(&args, 0xff, &value)) || *args)
+		{
+			printf("Usage: p <hex-address> | w <hex-address> <hex-byte>\n");
+			return true;
+		}
+		volatile uint8_t *memory = (volatile uint8_t *)(uintptr_t)address;
+		if (command == 'w')
+			*memory = (uint8_t)value;
+		else
+			value = *memory;
+		printf("%06lX %c %02X\n", (unsigned long)address,
+			   command == 'w' ? '<' : ':', (unsigned)value);
+		return true;
+	}
+	if (c == '\b' || c == '\177')
+	{
+		if (memory_args_length)
+			memory_args_length--;
+	}
+	else if ((unsigned char)c < ' ' && c != '\t')
+		memory_args_overflow = true;
+	else if (memory_args_length < sizeof(memory_args) - 1)
+		memory_args[memory_args_length++] = c;
+	else
+		memory_args_overflow = true;
+	return true;
+}
+
 /* Simple xorshift32 PRNG */
 static uint32_t prng_state = 1;
 
@@ -103,7 +202,14 @@ duartInterrupt(void)
 	if (status & ISR_RxRDYA)
 	{
 		volatile char c = RBRA; /* Reading the buffer clears RxRDYA in ISR  */
-		rec_a_buffer = c;		/* Replace with your receive handler         */
+		uint8_t next = (uint8_t)(serial_rx_head + 1);
+		if (next != serial_rx_tail)
+		{
+			serial_rx[serial_rx_head] = c;
+			serial_rx_head = next;
+		}
+		else
+			serial_rx_overflow = true;
 	}
 
 	/* ---- Channel B receiver ready ---- */
@@ -477,85 +583,122 @@ int main(void)
 
 	do
 	{
-		switch (rec_a_buffer)
+		static bool serial_discard_line;
+		while (serial_rx_tail != serial_rx_head)
 		{
-		case 'K':
-		case 'k':
-			struct tm time;
-			tk_get(&time);
-			printf("Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
-				   time.tm_year + 1900,
-				   time.tm_mon + 1,
-				   time.tm_mday,
-				   time.tm_hour,
-				   time.tm_min,
-				   time.tm_sec);
-			break;
-
-		case 'H':
-		case 'h':
-			printf("Hallo!\n");
-			break;
-
-		case 'D':
-		case 'd':
-		{
-			RTC_HOLD_SET();
-			while (RTC_IS_BUSY())
-				;
-
-			int d10 = RTC_READ(RTC_REG_D10);
-			int d1 = RTC_READ(RTC_REG_D1);
-			int mo10 = RTC_READ(RTC_REG_MO10);
-			int mo1 = RTC_READ(RTC_REG_MO1);
-			int y10 = RTC_READ(RTC_REG_Y10);
-			int y1 = RTC_READ(RTC_REG_Y1);
-
-			RTC_HOLD_CLR();
-
-			int day = d10 * 10 + d1;
-			int mon = mo10 * 10 + mo1;
-			int year = 2000 + y10 * 10 + y1;
-			printf("Datum: %02d.%02d.%04d\n", day, mon, year);
-			break;
-		}
-
-		case 'T':
-		case 't':
-		{
-			RTC_HOLD_SET();
-			while (RTC_IS_BUSY())
-				;
-
-			int s10 = RTC_READ(RTC_REG_S10);
-			int s1 = RTC_READ(RTC_REG_S1);
-			int mi10 = RTC_READ(RTC_REG_MI10);
-			int mi1 = RTC_READ(RTC_REG_MI1);
-			int h10 = RTC_READ(RTC_REG_H10) & 0x3;
-			int h1 = RTC_READ(RTC_REG_H1);
-
-			RTC_HOLD_CLR();
-
-			int sec = s10 * 10 + s1;
-			int min = mi10 * 10 + mi1;
-			int hour = h10 * 10 + h1;
-			printf("Uhrzeit: %02d:%02d:%02d\n", hour, min, sec);
-			break;
-		}
-
-		default:
-			if (rec_a_buffer >= '0' && rec_a_buffer <= '7')
+			if (serial_rx_overflow)
 			{
-				dump_input(rec_a_buffer - '0');
+				serial_rx_overflow = false;
+				serial_rx_tail = serial_rx_head;
+				memory_command = 0;
+				serial_discard_line = true;
+				printf("Serial receive overflow; resend command after Enter\n");
+				break;
 			}
-			else if (rec_a_buffer != 0)
+			rec_a_buffer = serial_rx[serial_rx_tail];
+			serial_rx_tail = (uint8_t)(serial_rx_tail + 1);
+			if (serial_discard_line)
 			{
-				char buf[2] = {rec_a_buffer, '\0'};
-				print_string(buf);
+				if (rec_a_buffer == '\r' || rec_a_buffer == '\n')
+					serial_discard_line = false;
+				continue;
 			}
-			break;
-		}
+			if (serial_memory_input(rec_a_buffer))
+				continue;
+			switch (rec_a_buffer)
+			{
+			case 'P':
+			case 'p':
+				serial_memory_start('p');
+				break;
 
+			case 'W':
+			case 'w':
+				serial_memory_start('w');
+				break;
+
+			case '\r':
+			case '\n':
+				break;
+
+			case 'K':
+			case 'k':
+				struct tm time;
+				tk_get(&time);
+				printf("Datum: %04d-%02d-%02d %02d:%02d:%02d\n",
+					   time.tm_year + 1900,
+					   time.tm_mon + 1,
+					   time.tm_mday,
+					   time.tm_hour,
+					   time.tm_min,
+					   time.tm_sec);
+				break;
+
+			case 'H':
+			case 'h':
+				printf("Hallo!\n");
+				break;
+
+			case 'D':
+			case 'd':
+			{
+				RTC_HOLD_SET();
+				while (RTC_IS_BUSY())
+					;
+
+				int d10 = RTC_READ(RTC_REG_D10);
+				int d1 = RTC_READ(RTC_REG_D1);
+				int mo10 = RTC_READ(RTC_REG_MO10);
+				int mo1 = RTC_READ(RTC_REG_MO1);
+				int y10 = RTC_READ(RTC_REG_Y10);
+				int y1 = RTC_READ(RTC_REG_Y1);
+
+				RTC_HOLD_CLR();
+
+				int day = d10 * 10 + d1;
+				int mon = mo10 * 10 + mo1;
+				int year = 2000 + y10 * 10 + y1;
+				printf("Datum: %02d.%02d.%04d\n", day, mon, year);
+				break;
+			}
+
+			case 'T':
+			case 't':
+			{
+				RTC_HOLD_SET();
+				while (RTC_IS_BUSY())
+					;
+
+				int s10 = RTC_READ(RTC_REG_S10);
+				int s1 = RTC_READ(RTC_REG_S1);
+				int mi10 = RTC_READ(RTC_REG_MI10);
+				int mi1 = RTC_READ(RTC_REG_MI1);
+				int h10 = RTC_READ(RTC_REG_H10) & 0x3;
+				int h1 = RTC_READ(RTC_REG_H1);
+
+				RTC_HOLD_CLR();
+
+				int sec = s10 * 10 + s1;
+				int min = mi10 * 10 + mi1;
+				int hour = h10 * 10 + h1;
+				printf("Uhrzeit: %02d:%02d:%02d\n", hour, min, sec);
+				break;
+			}
+
+			default:
+				if (rec_a_buffer >= '0' && rec_a_buffer <= '7')
+				{
+					dump_input(rec_a_buffer - '0');
+				}
+				else if (rec_a_buffer != 0)
+				{
+					char buf[2] = {rec_a_buffer, '\0'};
+					print_string(buf);
+				}
+				break;
+			}
+
+		}
 		rec_a_buffer = 0x00;
 
 		counter++;
