@@ -29,7 +29,7 @@ static uint8_t digit_line(uint8_t chain, uint8_t field, uint8_t segment, uint8_t
 void output_test_tick(void)
 {
     enum { LAMP_COLUMNS = 12, LAMP_COUNT = 16 * LAMP_COLUMNS,
-           SNAKE_LENGTH = 12, STEP_MS = 128 };
+           SNAKE_LENGTH = 14, STEP_MS = 128 };
     static uint8_t row = 7;
     static uint8_t cycle;
     static uint8_t phase = 1;
